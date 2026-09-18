@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UDC Equipment Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: 'Arial', 'Helvetica', sans-serif; background: #f4f6fa; color: #172033; line-height: 1.4; padding-bottom: 40px; }
+    .top { background: #111b35; color: #fff; padding: 18px 34px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
+    .logo { font-weight: 800; font-size: 21px; letter-spacing: -0.2px; }
+    .sub { font-size: 12px; opacity: 0.75; margin-top: 3px; }
+    .top-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .role-switch { display: flex; background: #2a3550; border-radius: 40px; padding: 4px; gap: 2px; }
+    .role-switch button { padding: 6px 16px; font-size: 13px; font-weight: 700; border-radius: 40px; background: transparent; color: #b9c4da; border: none; cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
+    .role-switch button:hover { color: #fff; background: transparent; }
+    .role-switch button.active { background: #1769e0; color: #fff; }
+    .user { font-size: 13px; opacity: 0.9; background: #2a3550; padding: 6px 14px; border-radius: 40px; font-weight: 500; white-space: nowrap; }
+    .logout-btn { background: #dc2626; color: #fff; border: none; border-radius: 40px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .logout-btn:hover { background: #b91c1c; }
+    main { max-width: 1100px; margin: 28px auto; padding: 0 20px; }
+    .hero { background: #fff; border-radius: 18px; padding: 30px; box-shadow: 0 5px 22px rgba(0, 0, 0, 0.05); }
+    h1 { margin: 0 0 8px; font-size: 30px; font-weight: 700; letter-spacing: -0.3px; }
+    h2 { margin-top: 0; font-size: 24px; font-weight: 700; margin-bottom: 18px; }
+    h3 { font-size: 15px; font-weight: 700; margin: 18px 0 8px; color: #1e293b; }
+    p { color: #5c667a; font-size: 15px; }
+    .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 25px; }
+    button, .btn { border: 0; border-radius: 11px; padding: 16px 14px; font-size: 16px; font-weight: 700; cursor: pointer; background: #e9edf5; color: #172033; transition: background 0.15s, transform 0.1s; font-family: inherit; }
+    button:hover { background: #d8dfeb; }
+    button:active { transform: scale(0.98); }
+    .primary { background: #1769e0; color: #fff; }
+    .primary:hover { background: #0e57c2; }
+    .small-btn { padding: 8px 14px; font-size: 13px; border-radius: 8px; background: #1769e0; color: #fff; }
+    .small-btn:hover { background: #0e57c2; }
+    .panel { display: none; margin-top: 20px; background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 5px 22px rgba(0, 0, 0, 0.05); }
+    .panel.active { display: block; }
+    label { display: block; font-weight: 700; margin: 16px 0 6px; font-size: 14px; color: #1e293b; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd3e1; border-radius: 9px; font-size: 15px; font-family: inherit; background: #fff; transition: border 0.15s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #1769e0; box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.1); }
+    textarea { min-height: 80px; resize: vertical; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .full { grid-column: 1 / -1; }
+    .msg { margin-top: 15px; padding: 12px 16px; border-radius: 9px; background: #eef6ee; border-left: 5px solid #2e7d32; display: none; font-weight: 500; color: #1e4620; }
+    .msg.error { background: #fef2f2; border-left-color: #b91c1c; color: #7f1d1d; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+    .stat { padding: 18px; background: #f7f9fc; border-radius: 12px; border: 1px solid #e2e8f2; }
+    .num { font-size: 25px; font-weight: 800; color: #111b35; }
+    .small { font-size: 12px; color: #687386; font-weight: 500; margin-top: 4px; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+    .table th, .table td { padding: 10px; border-bottom: 1px solid #e5e8ee; text-align: left; }
+    .table th { background: #f1f4fa; font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .table tr:last-child td { border-bottom: none; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 30px; font-size: 11px; font-weight: 700; background: #e8f0fe; color: #1769e0; }
+    .status-badge.out { background: #fff3e0; color: #b85c00; }
+    .status-badge.pending { background: #f3e8ff; color: #7c3aed; }
+    .status-badge.approved { background: #dcfce7; color: #15803d; }
+    .status-badge.denied { background: #fee2e2; color: #b91c1c; }
+    .flex-btn { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+    .btn-secondary { background: #e9edf5; color: #172033; }
+    .equip-picker { border: 1px solid #cbd3e1; border-radius: 9px; padding: 10px; max-height: 240px; overflow-y: auto; background: #fff; }
+    .equip-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: background 0.12s; font-size: 14px; }
+    .equip-item:hover { background: #f1f4fa; }
+    .equip-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+    .equip-item label { margin: 0; font-weight: 500; cursor: pointer; flex: 1; }
+    .equip-item .equip-id { font-size: 11px; color: #687386; font-weight: 700; background: #f1f4fa; padding: 2px 8px; border-radius: 20px; }
+    .empty-note { padding: 14px; color: #8b95a5; font-size: 13px; text-align: center; font-style: italic; }
+    .selected-window { margin-top: 18px; border: 1px solid #cbd3e1; border-radius: 12px; background: #f9fbfe; overflow: hidden; }
+    .selected-window-header { background: #1769e0; color: #fff; padding: 10px 16px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .selected-window-header .count { background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 20px; font-size: 12px; }
+    .selected-list { padding: 6px 0; max-height: 260px; overflow-y: auto; }
+    .selected-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e5e8ee; font-size: 14px; }
+    .selected-item:last-child { border-bottom: none; }
+    .selected-item .name { font-weight: 600; }
+    .selected-item .id { font-size: 11px; color: #687386; font-weight: 700; margin-left: 8px; }
+    .remove-btn { background: #ffe5e5; color: #b91c1c; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .remove-btn:hover { background: #fecaca; }
+    .selected-empty { padding: 20px; text-align: center; color: #8b95a5; font-size: 13px; font-style: italic; }
+    .damage-section { display: none; margin-top: 8px; background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 10px; padding: 14px; }
+    .damage-section.active { display: block; }
+    .damage-section label { color: #b91c1c; margin-top: 0; }
+    .damage-section textarea { border-color: #f5c6c6; min-height: 60px; }
+    .other-equip-section { margin-top: 14px; border: 1px dashed #cbd3e1; border-radius: 10px; padding: 14px; background: #f9fbfe; }
+    .other-equip-section label { margin-top: 0; }
+    .other-item-tag { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; border: 1px solid #c8d9f5; border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 600; color: #1e3a6e; margin: 4px 4px 0 0; }
+    .other-item-tag .remove-tag { cursor: pointer; color: #b91c1c; font-weight: 800; font-size: 14px; }
+    .req-item-row { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e8ee; }
+    .req-item-row:last-child { border-bottom: none; }
+    .req-item-row .req-name { flex: 1; font-weight: 600; font-size: 14px; }
+    .req-item-row .req-id { font-size: 11px; color: #687386; font-weight: 700; background: #f1f4fa; padding: 2px 8px; border-radius: 20px; }
+    .req-item-row input[type="number"] { width: 70px; padding: 6px 8px; text-align: center; font-size: 14px; }
+    .req-add-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .req-add-row > div { flex: 1; min-width: 180px; }
+    .req-cart-empty { padding: 16px; text-align: center; color: #8b95a5; font-size: 13px; font-style: italic; border: 1px dashed #cbd3e1; border-radius: 9px; }
+    body.role-user .admin-only { display: none !important; }
+    body.role-admin .user-only { display: none !important; }
+    .request-row-actions { display: flex; gap: 6px; }
+    .approve-btn { background: #dcfce7; color: #15803d; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .approve-btn:hover { background: #bbf7d0; }
+    .deny-btn { background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .deny-btn:hover { background: #fecaca; }
+    .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(17, 27, 53, 0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .login-modal { background: #fff; border-radius: 18px; padding: 32px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .login-modal h2 { margin-top: 0; font-size: 22px; margin-bottom: 6px; }
+    .login-modal p { font-size: 13px; color: #5c667a; margin-bottom: 18px; }
+    .login-error { margin-top: 12px; padding: 10px 14px; background: #fef2f2; border-left: 4px solid #b91c1c; border-radius: 6px; color: #7f1d1d; font-size: 13px; display: none; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .bell-btn { position: relative; background: #2a3550; color: #fff; border: none; border-radius: 40px; padding: 8px 14px; font-size: 18px; cursor: pointer; font-family: inherit; line-height: 1; }
+    .bell-btn:hover { background: #3a4770; }
+    .bell-badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: #fff; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 2px 6px; min-width: 18px; text-align: center; display: none; }
+    .bell-badge.visible { display: inline-block; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; padding: 12px; background: #f7f9fc; border: 1px solid #e2e8f2; border-radius: 10px; }
+    .toolbar label { margin: 0; font-size: 12px; font-weight: 700; color: #1e293b; }
+    .toolbar select, .toolbar input { padding: 8px 10px; font-size: 13px; border-radius: 7px; border: 1px solid #cbd3e1; width: auto; min-width: 140px; }
+    .toolbar input[type="text"] { min-width: 200px; flex: 1; }
+    .toolbar .result-count { margin-left: auto; font-size: 12px; font-weight: 700; color: #687386; }
+    @media (max-width: 700px) {
+      .top { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 10px; }
+      .actions, .cards, .grid { grid-template-columns: 1fr; }
+      .hero { padding: 22px; }
+      .panel { padding: 22px; }
+      h1 { font-size: 26px; }
+      .req-add-row { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body class="role-admin">
+
+  <!-- LOGIN MODAL -->
+  <div class="login-overlay" id="loginOverlay" style="display:none;">
+    <div class="login-modal">
+      <h2>Admin Login</h2>
+      <p>Sign in with your admin credentials to manage equipment.</p>
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="admin@example.com">
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="Your password">
+      <div class="flex-btn" style="margin-top:18px;">
+        <button class="primary" id="loginBtn" style="flex:1;" onclick="handleLogin()">Sign In</button>
+        <button class="btn-secondary" onclick="closeLogin()">Cancel</button>
+      </div>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <header class="top">
+    <div>
+      <div class="logo">UDC Equipment</div>
+      <div class="sub">Student Center Equipment Management</div>
+    </div>
+    <div class="top-right">
+      <div class="role-switch">
+        <button id="roleBtnAdmin" class="active" onclick="setRole('admin')">Admin</button>
+        <button id="roleBtnUser" onclick="setRole('user')">User</button>
+      </div>
+      <button class="bell-btn" id="bellBtn" onclick="goToPending()" title="Pending Pre-Requests">
+        🔔
+        <span class="bell-badge" id="bellBadge">0</span>
+      </button>
+      <div class="user" id="userLabel">Not signed in</div>
+      <button class="logout-btn" id="logoutBtn" style="display:none;" onclick="handleLogout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1 id="heroTitle">Equipment Management</h1>
+      <p id="heroSub">What would you like to do?</p>
+      <div class="actions">
+        <button class="primary" type="button" onclick="show('checkout')">Check Out</button>
+        <button type="button" onclick="show('checkin')">Check In</button>
+        <button type="button" onclick="show('request')">Pre-Request</button>
+      </div>
+    </section>
+
+    <!-- CHECKOUT PANEL -->
+    <section id="checkout" class="panel">
+      <h2>Check Out Equipment</h2>
+      <div class="grid">
+        <div>
+          <label>Checkout Location (Source)</label>
+          <select id="coLoc" onchange="onSourceLocationChange()"></select>
+        </div>
+        <div>
+          <label>Destination Location</label>
+          <select id="coDestination" onchange="toggleOtherDestination()">
+            <option value="">— Select destination —</option>
+          </select>
+        </div>
+      </div>
+      <div id="coDestinationOtherWrap" style="display:none; margin-top:8px;">
+        <label>Specify destination</label>
+        <input id="coDestinationOther" placeholder="Type custom destination...">
+      </div>
+      <h3>Select Equipment (multiple allowed)</h3>
+      <div id="coEquipPicker" class="equip-picker">
+        <div class="empty-note">Select a checkout location above to see available equipment.</div>
+      </div>
+      <div class="selected-window">
+        <div class="selected-window-header">
+          <span>Selected Equipment</span>
+          <span class="count" id="coSelectedCount">0 items</span>
+        </div>
+        <div class="selected-list" id="coSelectedList">
+          <div class="selected-empty">No equipment selected yet.</div>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:18px;">
+        <div>
+          <label>Your Name</label>
+          <input id="coName" placeholder="Enter your name">
+        </div>
+        <div>
+          <label>Checkout Date</label>
+          <input id="coDate" type="date">
+        </div>
+        <div>
+          <label>Purpose</label>
+          <input id="coPurpose" placeholder="Event, program, activity, etc.">
+        </div>
+        <div class="full">
+          <label>Notes</label>
+          <textarea id="coNotes" placeholder="Optional notes"></textarea>
+        </div>
+      </div>
+      <div class="flex-btn">
+        <button class="primary" id="coSubmitBtn" onclick="submitCheckout()">Submit Checkout</button>
+        <button class="btn-secondary" onclick="hide('checkout')">Cancel</button>
+      </div>
+      <div id="coMsg" class="msg">Checkout submitted successfully.</div>
+    </section>
+
+    <!-- CHECKIN PANEL -->
+    <section id="checkin" class="panel">
+      <h2>Check In Equipment</h2>
+      <div class="grid">
+        <div>
+          <label>Return Location</label>
+          <select id="ciLoc" onchange="onReturnLocationChange()"></select>
+        </div>
+        <div>
+          <label>Returned By</label>
+          <input id="ciReturner" placeholder="Your name">
+        </div>
+        <div>
+          <label>Return Date</label>
+          <input id="ciReturnDate" type="date">
+        </div>
+      </div>
+      <h3>Select Equipment to Return (multiple allowed)</h3>
+      <div id="ciEquipPicker" class="equip-picker">
+        <div class="empty-note">Select a return location above to see equipment.</div>
+      </div>
+      <div class="selected-window">
+        <div class="selected-window-header">
+          <span>Selected Equipment for Return</span>
+          <span class="count" id="ciSelectedCount">0 items</span>
+        </div>
+        <div class="selected-list" id="ciSelectedList">
+          <div class="selected-empty">No equipment selected yet.</div>
+        </div>
+      </div>
+      <div class="other-equip-section">
+        <label>Other Equipment (not in list)</label>
+        <p style="font-size:13px; color:#5c667a; margin-bottom:6px;">Add any equipment that isn't shown above.</p>
+        <div class="req-add-row">
+          <div style="flex:2;">
+            <input id="ciOtherName" placeholder="Equipment name / description">
+          </div>
+          <div style="flex:0 0 90px;">
+            <input id="ciOtherQty" type="number" min="1" value="1">
+          </div>
+          <button class="small-btn" style="padding:10px 18px;" onclick="addOtherCheckinItem()">Add</button>
+        </div>
+        <div id="ciOtherTags" style="margin-top:10px;"></div>
+      </div>
+      <label>Condition on Return</label>
+      <select id="ciCondition" onchange="toggleDamageSection()">
+        <option>Excellent</option>
+        <option>Good</option>
+        <option>Fair</option>
+        <option>Damaged</option>
+      </select>
+      <div id="ciDamageSection" class="damage-section">
+        <label>Describe the damage</label>
+        <textarea id="ciDamageNotes" placeholder="Please describe the damage in detail..."></textarea>
+      </div>
+      <label>Notes</label>
+      <textarea id="ciNotes" placeholder="Any additional notes"></textarea>
+      <div class="flex-btn">
+        <button class="primary" id="ciSubmitBtn" onclick="submitCheckin()">Submit Check-In</button>
+        <button class="btn-secondary" onclick="hide('checkin')">Cancel</button>
+      </div>
+      <div id="ciMsg" class="msg">Check-in submitted successfully.</div>
+    </section>
+
+    <!-- PRE-REQUEST PANEL -->
+    <section id="request" class="panel">
+      <h2>Equipment Pre-Request</h2>
+      <div class="grid">
+        <div>
+          <label>Your Name</label>
+          <input id="rqName" placeholder="Your name">
+        </div>
+        <div>
+          <label>Date Needed</label>
+          <input id="rqDateNeeded" type="date">
+        </div>
+        <div>
+          <label>Expected Return</label>
+          <input id="rqReturn" type="date">
+        </div>
+        <div>
+          <label>Location Equipment Will Be Used</label>
+          <select id="rqUseLocation" onchange="toggleOtherUsageLocation()">
+            <option value="">— Select usage location —</option>
+          </select>
+        </div>
+      </div>
+      <div id="rqUseLocationOtherWrap" style="display:none; margin-top:8px;">
+        <label>Specify usage location</label>
+        <input id="rqUseLocationOther" placeholder="Type custom usage location...">
+      </div>
+      <h3>Requested Equipment</h3>
+      <div class="req-add-row">
+        <div style="flex:2;">
+          <label style="margin-top:0;">Equipment</label>
+          <select id="rqEquipSelect"></select>
+        </div>
+        <div style="flex:0 0 100px;">
+          <label style="margin-top:0;">Qty</label>
+          <input id="rqEquipQty" type="number" min="1" value="1">
+        </div>
+        <div style="flex:0 0 auto;">
+          <button class="small-btn" style="padding:12px 20px;" onclick="addRequestItem()">Add Item</button>
+        </div>
+      </div>
+      <div id="rqCart" style="margin-top:14px;">
+        <div class="req-cart-empty">No items added yet. Use the form above to add equipment.</div>
+      </div>
+      <label style="margin-top:20px;">Notes</label>
+      <input id="rqNotes" placeholder="Additional information">
+      <div class="flex-btn">
+        <button class="primary" id="rqSubmitBtn" onclick="submitRequest()">Submit Pre-Request</button>
+        <button class="btn-secondary" onclick="hide('request')">Cancel</button>
+      </div>
+      <div id="rqMsg" class="msg">Pre-request submitted successfully.</div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section class="panel active admin-only" id="dashboard">
+      <h2>Admin Dashboard</h2>
+      <div class="cards">
+        <div class="stat">
+          <div class="num" id="total">–</div>
+          <div class="small">Inventory Items</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="available">–</div>
+          <div class="small">Available</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="out">–</div>
+          <div class="small">Checked Out</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="locations">–</div>
+          <div class="small">Locations</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <label>Filter by Status</label>
+        <select id="invStatusFilter" onchange="renderInventoryTable()">
+          <option value="">All</option>
+          <option value="Available">Available</option>
+          <option value="Checked Out">Checked Out</option>
+        </select>
+        <label>Filter by Location</label>
+        <select id="invLocationFilter" onchange="renderInventoryTable()">
+          <option value="">All Locations</option>
+        </select>
+        <label>Sort</label>
+        <select id="invSort" onchange="renderInventoryTable()">
+          <option value="id">Equipment ID (A–Z)</option>
+          <option value="id-desc">Equipment ID (Z–A)</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="location">Location (A–Z)</option>
+          <option value="status">Status (Available first)</option>
+        </select>
+        <input type="text" id="invSearch" placeholder="Search ID or name..." oninput="renderInventoryTable()">
+        <span class="result-count" id="invCount">0 items</span>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Equipment ID</th>
+            <th>Equipment</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inv"></tbody>
+      </table>
+    </section>
+
+    <!-- ADMIN: PENDING PRE-REQUESTS -->
+    <section class="panel admin-only" id="pendingRequests">
+      <h2><span class="live-dot"></span>Pending Pre-Requests</h2>
+      <p style="font-size:14px; color:#5c667a; margin-bottom:10px;">Live updates — new requests appear automatically.</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Requester</th>
+            <th>Items</th>
+            <th>Usage Location</th>
+            <th>Date Needed</th>
+            <th>Return</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pendingTable">
+          <tr>
+            <td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">
+              No pending requests at this time.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- USER: MY REQUESTS -->
+    <section class="panel user-only" id="myRequests">
+      <h2>My Pre-Requests</h2>
+      <div id="myRequestsList">
+        <div class="req-cart-empty">You haven't submitted any pre-requests yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ============================================================
+    // SUPABASE CONFIGURATION
+    // ============================================================
+    const SUPABASE_URL = 'https://yktofqgwbvwobrjdbeyd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_9Yht9rutC0RQjDI0h_AmVA_8VQSbV2s';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ============================================================
+    // CONSTANTS
+    // ============================================================
+    const CHECKOUT_LOCATIONS = [
+      "B-Level storage",
+      "C-Level storage",
+      "Ballroom storage",
+      "Ballroom AV closet"
+    ];
+
+    const DESTINATION_LOCATIONS = [
+      "Ballroom A",
+      "Ballroom B",
+      "Heritage Hall",
+      "Tower Conference 101",
+      "Executive Conference 110",
+      "Pre Function Ballroom",
+      "Room A01",
+      "Sudent Lounge",
+      "Student Center GYM",
+      "Study Room 103",
+      "Greek Row",
+      "Student Center- Atrium",
+      "Student Center- A-Level Plaza",
+      "Window Lounge",
+      "Denard Plaza",
+      "Theater of Arts",
+      "Ample Theater",
+      "Dining Hall – Events",
+      "Theater – Backstage",
+      "Black Box",
+      "study Room – 132",
+      "Other"
+    ];
+
+    let EQUIPMENT = [];
+    let selectedEquipment = [];
+    let selectedCheckinItems = [];
+    let otherCheckinItems = [];
+    let requestCart = [];
+    let pendingRequests = [];
+    let myRequests = [];
+    let currentRole = 'admin';
+    let currentUser = null;
+    let realtimeChannel = null;
+
+    // ============================================================
+    // AUTHENTICATION
+    // ============================================================
+    async function checkAuth() {
+      const { data: { session } } = await sb.auth.getSession();
+      currentUser = session ? session.user : null;
+      updateAuthUI();
+    }
+
+    function updateAuthUI() {
+      const userLabel = document.getElementById('userLabel');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (currentUser) {
+        userLabel.textContent = 'Admin · ' + (currentUser.email || 'signed in');
+        logoutBtn.style.display = 'inline-block';
+      } else {
+        userLabel.textContent = 'Not signed in';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    function openLogin() {
+      document.getElementById('loginOverlay').style.display = 'flex';
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function closeLogin() {
+      document.getElementById('loginOverlay').style.display = 'none';
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorBox = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+
+      if (!email || !password) {
+        errorBox.textContent = 'Please enter both email and password.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span>Signing in...';
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+
+      if (error) {
+        errorBox.textContent = error.message;
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      currentUser = data.user;
+      updateAuthUI();
+      closeLogin();
+      await loadPendingRequests();
+      await loadMyRequests();
+      subscribeToRealtime();
+    }
+
+    async function handleLogout() {
+      await sb.auth.signOut();
+      currentUser = null;
+      updateAuthUI();
+      pendingRequests = [];
+      myRequests = [];
+      renderPendingRequests();
+      renderMyRequests();
+      if (realtimeChannel) {
+        sb.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+      }
+    }
+
+    // ============================================================
+    // ROLE SWITCHING
+    // ============================================================
+    function setRole(role) {
+      currentRole = role;
+      document.body.className = 'role-' + role;
+      document.getElementById('roleBtnAdmin').classList.toggle('active', role === 'admin');
+      document.getElementById('roleBtnUser').classList.toggle('active', role === 'user');
+      document.getElementById('heroTitle').textContent =
+        role === 'admin' ? 'Equipment Management' : 'Equipment Requests';
+      document.getElementById('heroSub').textContent =
+        role === 'admin'
+          ? 'Manage checkouts, returns, and student requests.'
+          : 'Request equipment for your event or activity.';
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      if (role === 'admin') {
+        document.getElementById('dashboard').classList.add('active');
+        if (!currentUser) openLogin();
+      } else {
+        document.getElementById('myRequests').classList.add('active');
+      }
+    }
+
+    // ============================================================
+    // PANEL SWITCHING
+    // ============================================================
+    function show(panelId) {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      if (panel.classList.contains('admin-only') && currentRole !== 'admin') return;
+      if (panel.classList.contains('user-only') && currentRole !== 'user') return;
+      if (currentRole === 'admin' && !currentUser && panelId === 'pendingRequests') {
+        openLogin();
+        return;
+      }
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      panel.classList.add('active');
+      document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
+    }
+
+    function hide(panelId) {
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.remove('active');
+    }
+
+    function showMessage(msgId) {
+      document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
+      const msg = document.getElementById(msgId);
+      if (msg) {
+        msg.style.display = 'block';
+        setTimeout(() => { msg.style.display = 'none'; }, 5000);
+      }
+    }
+
+    function showMsgWithError(msgId, isError) {
+      const msg = document.getElementById(msgId);
+      if (!msg) return;
+      msg.classList.toggle('error', !!isError);
+      showMessage(msgId);
+    }
+
+    // ============================================================
+    // TOGGLES
+    // ============================================================
+    function toggleOtherDestination() {
+      const sel = document.getElementById('coDestination');
+      const wrap = document.getElementById('coDestinationOtherWrap');
+      wrap.style.display = sel.value === 'Other' ? 'block' : 'none';
+      if (sel.value !== 'Other') document.getElementById('coDestinationOther').value = '';
+    }
+
+    function toggleOtherUsageLocation() {
+      const sel = document.getElementById('rqUseLocation');
+      const wrap = document.getElementById('rqUseLocationOtherWrap');
+      wrap.style.display = sel.value === 'Other' ? 'block' : 'none';
+      if (sel.value !== 'Other') document.getElementById('rqUseLocationOther').value = '';
+    }
+
+    function toggleDamageSection() {
+      const cond = document.getElementById('ciCondition').value;
+      const section = document.getElementById('ciDamageSection');
+      if (cond === 'Damaged') {
+        section.classList.add('active');
+      } else {
+        section.classList.remove('active');
+        document.getElementById('ciDamageNotes').value = '';
+      }
+    }
+
+    // ============================================================
+    // POPULATE DROPDOWNS
+    // ============================================================
+    function populateCheckoutLocations() {
+      const sel = document.getElementById('coLoc');
+      sel.innerHTML = '<option value="">— Select source —</option>';
+      CHECKOUT_LOCATIONS.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        sel.appendChild(opt);
+      });
+    }
+
+    function populateDestinationLocations() {
+      const sel = document.getElementById('coDestination');
+      sel.innerHTML = '<option value="">— Select destination —</option>';
+      DESTINATION_LOCATIONS.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        sel.appendChild(opt);
+      });
+    }
+
+    function populateReturnLocations() {
+      const sel = document.getElementById('ciLoc');
+      sel.innerHTML = '<option value="">— Select return location —</option>';
+      CHECKOUT_LOCATIONS.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        sel.appendChild(opt);
+      });
+    }
+
+    function populateUsageLocations() {
+      const sel = document.getElementById('rqUseLocation');
+      sel.innerHTML = '<option value="">— Select usage location —</option>';
+      DESTINATION_LOCATIONS.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ============================================================
+    // LOAD DATA FROM SUPABASE
+    // ============================================================
+    async function loadInventory() {
+      const { data, error } = await sb
+        .from('inventory')
+        .select('equipment_id, name, location, status');
+      if (error) {
+        console.error('Failed to load inventory:', error);
+        return;
+      }
+      EQUIPMENT = data.map(item => ({
+        id: item.equipment_id,
+        name: item.name,
+        location: item.location,
+        status: item.status
+      }));
+    }
+
+    async function loadPendingRequests() {
+      if (!currentUser) return;
+      const { data, error } = await sb
+        .from('requests')
+        .select('*')
+        .eq('status', 'Pending')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Failed to load pending requests:', error);
+        return;
+      }
+      pendingRequests = data.map(r => ({
+        id: r.id,
+        name: r.name,
+        items: parseEquipmentString(r.equipment),
+        useLocation: r.location,
+        dateNeeded: r.date_needed,
+        returnDate: r.return_date,
+        notes: r.notes,
+        status: r.status
+      }));
+      renderPendingRequests();
+    }
+
+    async function loadMyRequests() {
+      const { data, error } = await sb
+        .from('requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) {
+        console.error('Failed to load requests:', error);
+        return;
+      }
+      myRequests = data.map(r => ({
+        id: r.id,
+        name: r.name,
+        items: parseEquipmentString(r.equipment),
+        useLocation: r.location,
+        dateNeeded: r.date_needed,
+        returnDate: r.return_date,
+        notes: r.notes,
+        status: r.status
+      }));
+      renderMyRequests();
+    }
+
+    function parseEquipmentString(str) {
+      if (!str) return [];
+      return str.split(';').map(part => {
+        const trimmed = part.trim();
+        const match = trimmed.match(/^(.+?)\s*\(x(\d+)\)$/);
+        if (match) {
+          return { name: match[1].trim(), qty: parseInt(match[2], 10) };
+        }
+        return { name: trimmed, qty: 1 };
+      });
+    }
+
+    // ============================================================
+    // REALTIME
+    // ============================================================
+    function subscribeToRealtime() {
+      if (realtimeChannel) {
+        sb.removeChannel(realtimeChannel);
+      }
+      realtimeChannel = sb
+        .channel('db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'requests' },
+          (payload) => {
+            console.log('Requests change:', payload);
+            if (currentUser) loadPendingRequests();
+            loadMyRequests();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'inventory' },
+          async (payload) => {
+            console.log('Inventory change:', payload);
+            await loadInventory();
+            renderDashboard();
+            if (document.getElementById('coLoc').value) renderEquipmentPicker();
+            if (document.getElementById('ciLoc').value) renderCheckinPicker();
+            populateRequestEquipSelect();
+          }
+        )
+        .subscribe();
+    }
+
+    // ============================================================
+    // CHECKOUT PICKER
+    // ============================================================
+    function onSourceLocationChange() {
+      selectedEquipment = [];
+      renderSelectedEquipment();
+      renderEquipmentPicker();
+    }
+
+    function renderEquipmentPicker() {
+      const locSelect = document.getElementById('coLoc');
+      const picker = document.getElementById('coEquipPicker');
+      const selectedLoc = locSelect.value;
+      if (!selectedLoc) {
+        picker.innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>';
+        return;
+      }
+      const available = EQUIPMENT.filter(
+        e => e.location === selectedLoc && e.status === 'Available'
+      );
+      if (available.length === 0) {
+        picker.innerHTML = '<div class="empty-note">No available equipment at this location.</div>';
+        return;
+      }
+      picker.innerHTML = '';
+      available.forEach(e => {
+        const isChecked = selectedEquipment.some(s => s.id === e.id);
+        const item = document.createElement('div');
+        item.className = 'equip-item';
+        item.innerHTML = `
+          <input type="checkbox" id="chk_${e.id}" ${isChecked ? 'checked' : ''}
+                 onchange="toggleEquipment('${e.id}')">
+          <label for="chk_${e.id}">${e.name}</label>
+          <span class="equip-id">${e.id}</span>
+        `;
+        picker.appendChild(item);
+      });
+    }
+
+    function toggleEquipment(equipId) {
+      const equip = EQUIPMENT.find(e => e.id === equipId);
+      if (!equip) return;
+      const idx = selectedEquipment.findIndex(s => s.id === equipId);
+      if (idx === -1) {
+        selectedEquipment.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1 });
+      } else {
+        selectedEquipment.splice(idx, 1);
+      }
+      renderSelectedEquipment();
+    }
+
+    function removeEquipment(equipId) {
+      selectedEquipment = selectedEquipment.filter(s => s.id !== equipId);
+      renderSelectedEquipment();
+      renderEquipmentPicker();
+    }
+
+    function updateQty(equipId, delta) {
+      const item = selectedEquipment.find(s => s.id === equipId);
+      if (!item) return;
+      const newQty = (item.qty || 1) + delta;
+      if (newQty >= 1) { item.qty = newQty; renderSelectedEquipment(); }
+    }
+
+    function setQty(equipId, value) {
+      const item = selectedEquipment.find(s => s.id === equipId);
+      if (!item) return;
+      const qty = parseInt(value, 10);
+      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
+      renderSelectedEquipment();
+    }
+
+    function renderSelectedEquipment() {
+      const list = document.getElementById('coSelectedList');
+      const count = document.getElementById('coSelectedCount');
+      const totalItems = selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0);
+      count.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
+      if (selectedEquipment.length === 0) {
+        list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      selectedEquipment.forEach(e => {
+        const qty = e.qty || 1;
+        const row = document.createElement('div');
+        row.className = 'selected-item';
+        row.style.flexWrap = 'wrap';
+        row.style.gap = '8px';
+        row.innerHTML = `
+          <div style="flex:1; min-width:160px;">
+            <span class="name">${e.name}</span>
+            <span class="id">${e.id}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateQty('${e.id}', -1)">−</button>
+            <input type="number" min="1" value="${qty}" style="width:60px; padding:4px 6px; text-align:center; font-size:14px; border-radius:6px;" onchange="setQty('${e.id}', this.value)">
+            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateQty('${e.id}', 1)">+</button>
+            <button class="remove-btn" onclick="removeEquipment('${e.id}')">Remove</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // CHECK-IN PICKER
+    // ============================================================
+    function onReturnLocationChange() {
+      selectedCheckinItems = [];
+      otherCheckinItems = [];
+      renderCheckinSelected();
+      renderCheckinPicker();
+      renderOtherTags();
+    }
+
+    function renderCheckinPicker() {
+      const locSelect = document.getElementById('ciLoc');
+      const picker = document.getElementById('ciEquipPicker');
+      const selectedLoc = locSelect.value;
+      if (!selectedLoc) {
+        picker.innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>';
+        return;
+      }
+      const itemsAtLoc = EQUIPMENT.filter(e => e.location === selectedLoc);
+      if (itemsAtLoc.length === 0) {
+        picker.innerHTML = '<div class="empty-note">No equipment registered at this location.</div>';
+        return;
+      }
+      picker.innerHTML = '';
+      itemsAtLoc.forEach(e => {
+        const isChecked = selectedCheckinItems.some(s => s.id === e.id);
+        const item = document.createElement('div');
+        item.className = 'equip-item';
+        item.innerHTML = `
+          <input type="checkbox" id="ci_chk_${e.id}" ${isChecked ? 'checked' : ''}
+                 onchange="toggleCheckinItem('${e.id}')">
+          <label for="ci_chk_${e.id}">${e.name}</label>
+          <span class="equip-id">${e.id}</span>
+        `;
+        picker.appendChild(item);
+      });
+    }
+
+    function toggleCheckinItem(equipId) {
+      const equip = EQUIPMENT.find(e => e.id === equipId);
+      if (!equip) return;
+      const idx = selectedCheckinItems.findIndex(s => s.id === equipId);
+      if (idx === -1) {
+        selectedCheckinItems.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1 });
+      } else {
+        selectedCheckinItems.splice(idx, 1);
+      }
+      renderCheckinSelected();
+    }
+
+    function removeCheckinItem(equipId) {
+      selectedCheckinItems = selectedCheckinItems.filter(s => s.id !== equipId);
+      renderCheckinSelected();
+      renderCheckinPicker();
+    }
+
+    function updateCheckinQty(equipId, delta) {
+      const item = selectedCheckinItems.find(s => s.id === equipId);
+      if (!item) return;
+      const newQty = (item.qty || 1) + delta;
+      if (newQty >= 1) { item.qty = newQty; renderCheckinSelected(); }
+    }
+
+    function setCheckinQty(equipId, value) {
+      const item = selectedCheckinItems.find(s => s.id === equipId);
+      if (!item) return;
+      const qty = parseInt(value, 10);
+      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
+      renderCheckinSelected();
+    }
+
+    function renderCheckinSelected() {
+      const list = document.getElementById('ciSelectedList');
+      const count = document.getElementById('ciSelectedCount');
+      const totalItems = selectedCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0) +
+                         otherCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0);
+      count.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
+      if (selectedCheckinItems.length === 0) {
+        list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      selectedCheckinItems.forEach(e => {
+        const qty = e.qty || 1;
+        const row = document.createElement('div');
+        row.className = 'selected-item';
+        row.style.flexWrap = 'wrap';
+        row.style.gap = '8px';
+        row.innerHTML = `
+          <div style="flex:1; min-width:160px;">
+            <span class="name">${e.name}</span>
+            <span class="id">${e.id}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateCheckinQty('${e.id}', -1)">−</button>
+            <input type="number" min="1" value="${qty}" style="width:60px; padding:4px 6px; text-align:center; font-size:14px; border-radius:6px;" onchange="setCheckinQty('${e.id}', this.value)">
+            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateCheckinQty('${e.id}', 1)">+</button>
+            <button class="remove-btn" onclick="removeCheckinItem('${e.id}')">Remove</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function addOtherCheckinItem() {
+      const nameInput = document.getElementById('ciOtherName');
+      const qtyInput = document.getElementById('ciOtherQty');
+      const name = nameInput.value.trim();
+      const qty = parseInt(qtyInput.value, 10) || 1;
+      if (!name) { alert('Please enter a name or description for the other equipment.'); return; }
+      otherCheckinItems.push({ name, qty });
+      nameInput.value = '';
+      qtyInput.value = '1';
+      renderOtherTags();
+      renderCheckinSelected();
+    }
+
+    function removeOtherCheckinItem(index) {
+      otherCheckinItems.splice(index, 1);
+      renderOtherTags();
+      renderCheckinSelected();
+    }
+
+    function renderOtherTags() {
+      const container = document.getElementById('ciOtherTags');
+      if (otherCheckinItems.length === 0) { container.innerHTML = ''; return; }
+      container.innerHTML = '';
+      otherCheckinItems.forEach((item, i) => {
+        const tag = document.createElement('span');
+        tag.className = 'other-item-tag';
+        tag.innerHTML = `${item.name} (x${item.qty}) <span class="remove-tag" onclick="removeOtherCheckinItem(${i})">×</span>`;
+        container.appendChild(tag);
+      });
+    }
+
+    // ============================================================
+    // PRE-REQUEST CART
+    // ============================================================
+    function populateRequestEquipSelect() {
+      const sel = document.getElementById('rqEquipSelect');
+      sel.innerHTML = '';
+      const available = EQUIPMENT.filter(e => e.status === 'Available');
+      if (available.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '— No equipment available —';
+        opt.disabled = true;
+        sel.appendChild(opt);
+        return;
+      }
+      const grouped = {};
+      available.forEach(e => {
+        if (!grouped[e.location]) grouped[e.location] = [];
+        grouped[e.location].push(e);
+      });
+      Object.keys(grouped).forEach(loc => {
+        const group = document.createElement('optgroup');
+        group.label = loc;
+        grouped[loc].forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id;
+          opt.textContent = `${e.name} (${e.id})`;
+          group.appendChild(opt);
+        });
+        sel.appendChild(group);
+      });
+    }
+
+    function addRequestItem() {
+      const sel = document.getElementById('rqEquipSelect');
+      const qtyInput = document.getElementById('rqEquipQty');
+      const equipId = sel.value;
+      const qty = parseInt(qtyInput.value, 10) || 1;
+      if (!equipId) { alert('Please select an equipment item.'); return; }
+      const equip = EQUIPMENT.find(e => e.id === equipId);
+      if (!equip) return;
+      const existing = requestCart.find(item => item.id === equipId);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        requestCart.push({ id: equip.id, name: equip.name, location: equip.location, qty });
+      }
+      qtyInput.value = '1';
+      renderRequestCart();
+    }
+
+    function removeRequestItem(equipId) {
+      requestCart = requestCart.filter(item => item.id !== equipId);
+      renderRequestCart();
+    }
+
+    function updateRequestQty(equipId, value) {
+      const item = requestCart.find(i => i.id === equipId);
+      if (!item) return;
+      const qty = parseInt(value, 10);
+      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
+      renderRequestCart();
+    }
+
+    function renderRequestCart() {
+      const cart = document.getElementById('rqCart');
+      if (requestCart.length === 0) {
+        cart.innerHTML = '<div class="req-cart-empty">No items added yet. Use the form above to add equipment.</div>';
+        return;
+      }
+      cart.innerHTML = '';
+      requestCart.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'req-item-row';
+        row.innerHTML = `
+          <div class="req-name">${item.name}</div>
+          <span class="req-id">${item.id}</span>
+          <input type="number" min="1" value="${item.qty}" onchange="updateRequestQty('${item.id}', this.value)">
+          <button class="remove-btn" onclick="removeRequestItem('${item.id}')">Remove</button>
+        `;
+        cart.appendChild(row);
+      });
+    }
+
+    // ============================================================
+    // DASHBOARD + SORTING
+    // ============================================================
+    function renderDashboard() {
+      const totalItems = EQUIPMENT.length;
+      const availableItems = EQUIPMENT.filter(e => e.status === 'Available').length;
+      const outItems = EQUIPMENT.filter(e => e.status === 'Checked Out').length;
+      const locationCount = CHECKOUT_LOCATIONS.length;
+
+      document.getElementById('total').textContent = totalItems;
+      document.getElementById('available').textContent = availableItems;
+      document.getElementById('out').textContent = outItems;
+      document.getElementById('locations').textContent = locationCount;
+
+      // Populate location filter (once)
+      const locFilter = document.getElementById('invLocationFilter');
+      if (locFilter && locFilter.options.length <= 1) {
+        const uniqueLocs = [...new Set(EQUIPMENT.map(e => e.location))].sort();
+        uniqueLocs.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc;
+          opt.textContent = loc;
+          locFilter.appendChild(opt);
+        });
+      }
+
+      renderInventoryTable();
+    }
+
+    function renderInventoryTable() {
+      const statusFilter = document.getElementById('invStatusFilter')?.value || '';
+      const locationFilter = document.getElementById('invLocationFilter')?.value || '';
+      const sortKey = document.getElementById('invSort')?.value || 'id';
+      const search = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
+
+      let items = [...EQUIPMENT];
+      if (statusFilter) items = items.filter(e => e.status === statusFilter);
+      if (locationFilter) items = items.filter(e => e.location === locationFilter);
+      if (search) {
+        items = items.filter(e =>
+          e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search)
+        );
+      }
+
+      items.sort((a, b) => {
+        switch (sortKey) {
+          case 'id': return a.id.localeCompare(b.id);
+          case 'id-desc': return b.id.localeCompare(a.id);
+          case 'name': return a.name.localeCompare(b.name);
+          case 'location': return a.location.localeCompare(b.location) || a.id.localeCompare(b.id);
+          case 'status':
+            if (a.status === b.status) return a.id.localeCompare(b.id);
+            return a.status === 'Available' ? -1 : 1;
+          default: return 0;
+        }
+      });
+
+      const countEl = document.getElementById('invCount');
+      if (countEl) countEl.textContent = items.length + (items.length === 1 ? ' item' : ' items');
+
+      const tbody = document.getElementById('inv');
+      tbody.innerHTML = '';
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match your filters.</td></tr>`;
+        return;
+      }
+      items.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${e.id}</strong></td>
+          <td>${e.name}</td>
+          <td>${e.location}</td>
+          <td><span class="status-badge ${e.status === 'Checked Out' ? 'out' : ''}">${e.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ============================================================
+    // PENDING REQUESTS
+    // ============================================================
+    function renderPendingRequests() {
+      const tbody = document.getElementById('pendingTable');
+      if (pendingRequests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No pending requests at this time.</td></tr>`;
+      } else {
+        tbody.innerHTML = '';
+        pendingRequests.forEach((req) => {
+          const itemsSummary = req.items.map(it => `${it.name} (x${it.qty})`).join(', ');
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${req.name}</strong></td>
+            <td style="max-width:220px;">${itemsSummary}</td>
+            <td>${req.useLocation}</td>
+            <td>${req.dateNeeded || '—'}</td>
+            <td>${req.returnDate || '—'}</td>
+            <td>
+              <div class="request-row-actions">
+                <button class="approve-btn" onclick="approveRequest(${req.id})">Approve</button>
+                <button class="deny-btn" onclick="denyRequest(${req.id})">Deny</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      updateBellBadge();
+    }
+
+    function updateBellBadge() {
+      const badge = document.getElementById('bellBadge');
+      const count = pendingRequests.length;
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.add('visible');
+      } else {
+        badge.textContent = '0';
+        badge.classList.remove('visible');
+      }
+    }
+
+    function goToPending() {
+      if (!currentUser) {
+        openLogin();
+        return;
+      }
+      show('pendingRequests');
+    }
+
+    async function approveRequest(id) {
+      const { error } = await sb.from('requests').update({ status: 'Approved' }).eq('id', id);
+      if (error) { alert('Failed to approve: ' + error.message); return; }
+      await loadPendingRequests();
+    }
+
+    async function denyRequest(id) {
+      const { error } = await sb.from('requests').update({ status: 'Denied' }).eq('id', id);
+      if (error) { alert('Failed to deny: ' + error.message); return; }
+      await loadPendingRequests();
+    }
+
+    // ============================================================
+    // MY REQUESTS
+    // ============================================================
+    function renderMyRequests() {
+      const container = document.getElementById('myRequestsList');
+      if (myRequests.length === 0) {
+        container.innerHTML = '<div class="req-cart-empty">You haven\'t submitted any pre-requests yet.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      myRequests.forEach(req => {
+        const card = document.createElement('div');
+        card.style.border = '1px solid #e2e8f2';
+        card.style.borderRadius = '12px';
+        card.style.padding = '16px';
+        card.style.marginBottom = '12px';
+        card.style.background = '#f9fbfe';
+        const itemsHtml = req.items.map(it => `<li style="font-size:13px; padding:2px 0;">${it.name} — Qty: ${it.qty}</li>`).join('');
+        const badgeClass = req.status === 'Approved' ? 'approved' : req.status === 'Denied' ? 'denied' : 'pending';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:15px;">Pre-Request</strong>
+            <span class="status-badge ${badgeClass}">${req.status}</span>
+          </div>
+          <div style="font-size:13px; color:#5c667a; margin-bottom:6px;">
+            <strong>Usage Location:</strong> ${req.useLocation}<br>
+            <strong>Date Needed:</strong> ${req.dateNeeded || '—'} &nbsp;|&nbsp;
+            <strong>Return:</strong> ${req.returnDate || '—'}
+          </div>
+          <ul style="margin:6px 0 0 18px; padding:0;">${itemsHtml}</ul>
+          ${req.notes ? `<div style="font-size:13px; color:#5c667a; margin-top:8px;"><strong>Notes:</strong> ${req.notes}</div>` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ============================================================
+    // SUBMIT: CHECKOUT
+    // ============================================================
+    async function submitCheckout() {
+      const source = document.getElementById('coLoc').value;
+      const destSelect = document.getElementById('coDestination').value;
+      const destOther = document.getElementById('coDestinationOther').value.trim();
+      const name = document.getElementById('coName').value.trim();
+      const checkoutDate = document.getElementById('coDate').value;
+
+      let destination = destSelect;
+      if (destSelect === 'Other') {
+        if (!destOther) { alert('Please type a custom destination location.'); return; }
+        destination = destOther;
+      }
+      if (!source) { alert('Please select a checkout (source) location.'); return; }
+      if (selectedEquipment.length === 0) { alert('Please select at least one piece of equipment.'); return; }
+      if (!destination) { alert('Please select or enter a destination location.'); return; }
+      if (!name) { alert('Please enter your name.'); return; }
+      if (!checkoutDate) { alert('Please select a checkout date.'); return; }
+
+      setButtonLoading('coSubmitBtn', true);
+      const { error } = await sb.from('transactions').insert({
+        type: 'checkout',
+        name: name,
+        source: source,
+        destination: destination,
+        equipment: selectedEquipment.map(e => `${e.name} (x${e.qty || 1})`).join('; '),
+        quantity: selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0),
+        notes: document.getElementById('coNotes').value,
+        checkout_date: checkoutDate
+      });
+      setButtonLoading('coSubmitBtn', false);
+
+      if (error) {
+        showMsgWithError('coMsg', true);
+        document.getElementById('coMsg').textContent = 'Submission failed: ' + error.message;
+        return;
+      }
+      showMsgWithError('coMsg', false);
+      selectedEquipment = [];
+      renderSelectedEquipment();
+      renderEquipmentPicker();
+      document.getElementById('coLoc').value = '';
+      document.getElementById('coDestination').value = '';
+      document.getElementById('coDestinationOther').value = '';
+      document.getElementById('coDestinationOtherWrap').style.display = 'none';
+      document.getElementById('coName').value = '';
+      document.getElementById('coPurpose').value = '';
+      document.getElementById('coNotes').value = '';
+      document.getElementById('coEquipPicker').innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>';
+      setDatesToToday();
+    }
+
+    // ============================================================
+    // SUBMIT: CHECK-IN
+    // ============================================================
+    async function submitCheckin() {
+      const loc = document.getElementById('ciLoc').value;
+      const returner = document.getElementById('ciReturner').value.trim();
+      const condition = document.getElementById('ciCondition').value;
+      const damageNotes = document.getElementById('ciDamageNotes').value.trim();
+      const returnDate = document.getElementById('ciReturnDate').value;
+      const totalSelected = selectedCheckinItems.length + otherCheckinItems.length;
+
+      if (!loc) { alert('Please select a return location.'); return; }
+      if (totalSelected === 0) { alert('Please select or add at least one piece of equipment to return.'); return; }
+      if (!returner) { alert('Please enter the name of the person returning the equipment.'); return; }
+      if (condition === 'Damaged' && !damageNotes) { alert('Please describe the damage before submitting.'); return; }
+      if (!returnDate) { alert('Please select a return date.'); return; }
+
+      const allItems = [
+        ...selectedCheckinItems.map(e => `${e.name} (${e.id}) (x${e.qty || 1})`),
+        ...otherCheckinItems.map(e => `${e.name} (x${e.qty || 1}) [other]`)
+      ];
+
+      setButtonLoading('ciSubmitBtn', true);
+      const { error } = await sb.from('transactions').insert({
+        type: 'checkin',
+        name: returner,
+        source: loc,
+        equipment: allItems.join('; '),
+        quantity: selectedCheckinItems.reduce((s, e) => s + (e.qty || 1), 0) +
+                  otherCheckinItems.reduce((s, e) => s + (e.qty || 1), 0),
+        condition: condition,
+        damage_notes: damageNotes,
+        notes: document.getElementById('ciNotes').value,
+        return_date: returnDate
+      });
+      setButtonLoading('ciSubmitBtn', false);
+
+      if (error) {
+        showMsgWithError('ciMsg', true);
+        document.getElementById('ciMsg').textContent = 'Submission failed: ' + error.message;
+        return;
+      }
+      showMsgWithError('ciMsg', false);
+
+      selectedCheckinItems = [];
+      otherCheckinItems = [];
+      renderCheckinSelected();
+      renderCheckinPicker();
+      renderOtherTags();
+      document.getElementById('ciLoc').value = '';
+      document.getElementById('ciReturner').value = '';
+      document.getElementById('ciCondition').value = 'Excellent';
+      document.getElementById('ciDamageNotes').value = '';
+      document.getElementById('ciDamageSection').classList.remove('active');
+      document.getElementById('ciNotes').value = '';
+      document.getElementById('ciEquipPicker').innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>';
+      setDatesToToday();
+    }
+
+    // ============================================================
+    // SUBMIT: PRE-REQUEST
+    // ============================================================
+    async function submitRequest() {
+      const name = document.getElementById('rqName').value.trim();
+      const useLocSelect = document.getElementById('rqUseLocation').value;
+      const useLocOther = document.getElementById('rqUseLocationOther').value.trim();
+      let useLocation = useLocSelect;
+      if (useLocSelect === 'Other') {
+        if (!useLocOther) { alert('Please type a custom usage location.'); return; }
+        useLocation = useLocOther;
+      }
+      const dateNeeded = document.getElementById('rqDateNeeded').value;
+      const returnDate = document.getElementById('rqReturn').value;
+      const notes = document.getElementById('rqNotes').value.trim();
+
+      if (!name) { alert('Please enter your name before submitting.'); return; }
+      if (requestCart.length === 0) { alert('Please add at least one equipment item to your request.'); return; }
+      if (!useLocation) { alert('Please select or enter the location where the equipment will be used.'); return; }
+
+      setButtonLoading('rqSubmitBtn', true);
+      const { error } = await sb.from('requests').insert({
+        name: name,
+        equipment: requestCart.map(it => `${it.name} (x${it.qty})`).join('; '),
+        quantity: requestCart.reduce((sum, it) => sum + it.qty, 0),
+        location: useLocation,
+        date_needed: dateNeeded || null,
+        return_date: returnDate || null,
+        notes: notes,
+        status: 'Pending'
+      });
+      setButtonLoading('rqSubmitBtn', false);
+
+      if (error) {
+        showMsgWithError('rqMsg', true);
+        document.getElementById('rqMsg').textContent = 'Submission failed: ' + error.message;
+        return;
+      }
+      showMsgWithError('rqMsg', false);
+
+      requestCart = [];
+      renderRequestCart();
+      document.getElementById('rqName').value = '';
+      document.getElementById('rqDateNeeded').value = '';
+      document.getElementById('rqReturn').value = '';
+      document.getElementById('rqUseLocation').value = '';
+      document.getElementById('rqUseLocationOther').value = '';
+      document.getElementById('rqUseLocationOtherWrap').style.display = 'none';
+      document.getElementById('rqNotes').value = '';
+      document.getElementById('rqEquipQty').value = '1';
+
+      await loadMyRequests();
+    }
+
+    // ============================================================
+    // UTILITIES
+    // ============================================================
+    function setButtonLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.textContent;
+        btn.innerHTML = '<span class="loading"></span>Submitting...';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.originalText || 'Submit';
+      }
+    }
+
+    function setDatesToToday() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('coDate').value = todayStr;
+      document.getElementById('ciReturnDate').value = todayStr;
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    window.addEventListener('DOMContentLoaded', async function() {
+      populateCheckoutLocations();
+      populateDestinationLocations();
+      populateReturnLocations();
+      populateUsageLocations();
+
+      await loadInventory();
+      populateRequestEquipSelect();
+      renderRequestCart();
+      renderDashboard();
+      setDatesToToday();
+
+      document.getElementById('coDestinationOtherWrap').style.display = 'none';
+      document.getElementById('rqUseLocationOtherWrap').style.display = 'none';
+      document.getElementById('ciDamageSection').classList.remove('active');
+
+      await checkAuth();
+      await loadMyRequests();
+      if (currentUser) await loadPendingRequests();
+
+      subscribeToRealtime();
+
+      sb.auth.onAuthStateChange((event, session) => {
+        currentUser = session ? session.user : null;
+        updateAuthUI();
+        if (currentUser) {
+          loadPendingRequests();
+        } else {
+          pendingRequests = [];
+          renderPendingRequests();
+        }
+      });
+
+      setRole('user');
+    });
+  </script>
+</body>
+</html>
