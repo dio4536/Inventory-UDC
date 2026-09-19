@@ -58,7 +58,7 @@
     .status-badge.denied { background: #fee2e2; color: #b91c1c; }
     .flex-btn { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
     .btn-secondary { background: #e9edf5; color: #172033; }
-    .equip-picker { border: 1px solid #cbd3e1; border-radius: 9px; padding: 10px; max-height: 240px; overflow-y: auto; background: #fff; }
+    .equip-picker { border: 1px solid #cbd3e1; border-radius: 9px; padding: 10px; max-height: 340px; overflow-y: auto; background: #fff; }
     .equip-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: background 0.12s; font-size: 14px; }
     .equip-item:hover { background: #f1f4fa; }
     .equip-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
@@ -117,6 +117,23 @@
     .toolbar select, .toolbar input { padding: 8px 10px; font-size: 13px; border-radius: 7px; border: 1px solid #cbd3e1; width: auto; min-width: 140px; }
     .toolbar input[type="text"] { min-width: 200px; flex: 1; }
     .toolbar .result-count { margin-left: auto; font-size: 12px; font-weight: 700; color: #687386; }
+
+    /* GROUPED PICKER */
+    .picker-search { width: 100%; padding: 10px 12px; margin-bottom: 10px; border: 1px solid #cbd3e1; border-radius: 8px; font-size: 14px; font-family: inherit; }
+    .picker-search:focus { outline: none; border-color: #1769e0; box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.1); }
+    .equip-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f0f3f8; font-size: 14px; flex-wrap: wrap; }
+    .equip-row:last-child { border-bottom: none; }
+    .equip-row .row-name { flex: 1; font-weight: 600; min-width: 140px; }
+    .equip-row .row-stock { font-size: 11px; color: #687386; font-weight: 700; background: #eef4ff; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .equip-row .row-id-select { padding: 6px 10px; font-size: 13px; border-radius: 6px; border: 1px solid #cbd3e1; background: #fff; min-width: 100px; font-family: inherit; cursor: pointer; width: auto; }
+    .equip-row .row-id-select:focus { outline: none; border-color: #1769e0; box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.1); }
+    .equip-row .row-add-btn { background: #1769e0; color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .equip-row .row-add-btn:hover { background: #0e57c2; }
+    .equip-row.all-selected { background: #f5faf5; }
+    .equip-row.hidden { display: none; }
+    .qty-badge { background: #eef4ff; color: #1769e0; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 6px; }
+    .section-label { font-size: 11px; font-weight: 700; color: #687386; padding: 10px 10px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
     @media (max-width: 700px) {
       .top { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 10px; }
       .actions, .cards, .grid { grid-template-columns: 1fr; }
@@ -195,7 +212,10 @@
         <label>Specify destination</label>
         <input id="coDestinationOther" placeholder="Type custom destination...">
       </div>
-      <h3>Select Equipment (multiple allowed)</h3>
+      <h3>Select Equipment</h3>
+      <input type="text" class="picker-search" id="coPickerSearch"
+             placeholder="🔍 Search by equipment name or ID..."
+             oninput="filterCoPicker()">
       <div id="coEquipPicker" class="equip-picker">
         <div class="empty-note">Select a checkout location above to see available equipment.</div>
       </div>
@@ -250,7 +270,10 @@
           <input id="ciReturnDate" type="date">
         </div>
       </div>
-      <h3>Select Equipment to Return (multiple allowed)</h3>
+      <h3>Select Equipment to Return</h3>
+      <input type="text" class="picker-search" id="ciPickerSearch"
+             placeholder="🔍 Search by equipment name or ID..."
+             oninput="filterCiPicker()">
       <div id="ciEquipPicker" class="equip-picker">
         <div class="empty-note">Select a return location above to see equipment.</div>
       </div>
@@ -325,21 +348,14 @@
         <input id="rqUseLocationOther" placeholder="Type custom usage location...">
       </div>
       <h3>Requested Equipment</h3>
-      <div class="req-add-row">
-        <div style="flex:2;">
-          <label style="margin-top:0;">Equipment</label>
-          <select id="rqEquipSelect"></select>
-        </div>
-        <div style="flex:0 0 100px;">
-          <label style="margin-top:0;">Qty</label>
-          <input id="rqEquipQty" type="number" min="1" value="1">
-        </div>
-        <div style="flex:0 0 auto;">
-          <button class="small-btn" style="padding:12px 20px;" onclick="addRequestItem()">Add Item</button>
-        </div>
+      <input type="text" class="picker-search" id="rqPickerSearch"
+             placeholder="🔍 Search by equipment name..."
+             oninput="filterRqPicker()">
+      <div id="rqEquipPicker" class="equip-picker" style="max-height:300px;">
+        <div class="empty-note">Loading equipment...</div>
       </div>
       <div id="rqCart" style="margin-top:14px;">
-        <div class="req-cart-empty">No items added yet. Use the form above to add equipment.</div>
+        <div class="req-cart-empty">No items added yet.</div>
       </div>
       <label style="margin-top:20px;">Notes</label>
       <input id="rqNotes" placeholder="Additional information">
@@ -371,7 +387,6 @@
           <div class="small">Locations</div>
         </div>
       </div>
-
       <div class="toolbar">
         <label>Filter by Status</label>
         <select id="invStatusFilter" onchange="renderInventoryTable()">
@@ -394,13 +409,13 @@
         <input type="text" id="invSearch" placeholder="Search ID or name..." oninput="renderInventoryTable()">
         <span class="result-count" id="invCount">0 items</span>
       </div>
-
       <table class="table">
         <thead>
           <tr>
             <th>Equipment ID</th>
             <th>Equipment</th>
             <th>Location</th>
+            <th>Qty</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -532,27 +547,21 @@
       const password = document.getElementById('loginPassword').value;
       const errorBox = document.getElementById('loginError');
       const btn = document.getElementById('loginBtn');
-
       if (!email || !password) {
         errorBox.textContent = 'Please enter both email and password.';
         errorBox.style.display = 'block';
         return;
       }
-
       btn.disabled = true;
       btn.innerHTML = '<span class="loading"></span>Signing in...';
-
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
       btn.disabled = false;
       btn.textContent = 'Sign In';
-
       if (error) {
         errorBox.textContent = error.message;
         errorBox.style.display = 'block';
         return;
       }
-
       currentUser = data.user;
       updateAuthUI();
       closeLogin();
@@ -712,21 +721,19 @@
     }
 
     // ============================================================
-    // LOAD DATA FROM SUPABASE
+    // LOAD DATA
     // ============================================================
     async function loadInventory() {
       const { data, error } = await sb
         .from('inventory')
-        .select('equipment_id, name, location, status');
-      if (error) {
-        console.error('Failed to load inventory:', error);
-        return;
-      }
+        .select('equipment_id, name, location, status, quantity');
+      if (error) { console.error('Failed to load inventory:', error); return; }
       EQUIPMENT = data.map(item => ({
         id: item.equipment_id,
         name: item.name,
         location: item.location,
-        status: item.status
+        status: item.status,
+        quantity: item.quantity || 1
       }));
     }
 
@@ -737,10 +744,7 @@
         .select('*')
         .eq('status', 'Pending')
         .order('created_at', { ascending: false });
-      if (error) {
-        console.error('Failed to load pending requests:', error);
-        return;
-      }
+      if (error) { console.error('Failed to load pending requests:', error); return; }
       pendingRequests = data.map(r => ({
         id: r.id,
         name: r.name,
@@ -760,10 +764,7 @@
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
-      if (error) {
-        console.error('Failed to load requests:', error);
-        return;
-      }
+      if (error) { console.error('Failed to load requests:', error); return; }
       myRequests = data.map(r => ({
         id: r.id,
         name: r.name,
@@ -782,9 +783,7 @@
       return str.split(';').map(part => {
         const trimmed = part.trim();
         const match = trimmed.match(/^(.+?)\s*\(x(\d+)\)$/);
-        if (match) {
-          return { name: match[1].trim(), qty: parseInt(match[2], 10) };
-        }
+        if (match) return { name: match[1].trim(), qty: parseInt(match[2], 10) };
         return { name: trimmed, qty: 1 };
       });
     }
@@ -793,40 +792,29 @@
     // REALTIME
     // ============================================================
     function subscribeToRealtime() {
-      if (realtimeChannel) {
-        sb.removeChannel(realtimeChannel);
-      }
+      if (realtimeChannel) sb.removeChannel(realtimeChannel);
       realtimeChannel = sb
         .channel('db-changes')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'requests' },
-          (payload) => {
-            console.log('Requests change:', payload);
-            if (currentUser) loadPendingRequests();
-            loadMyRequests();
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'inventory' },
-          async (payload) => {
-            console.log('Inventory change:', payload);
-            await loadInventory();
-            renderDashboard();
-            if (document.getElementById('coLoc').value) renderEquipmentPicker();
-            if (document.getElementById('ciLoc').value) renderCheckinPicker();
-            populateRequestEquipSelect();
-          }
-        )
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, () => {
+          if (currentUser) loadPendingRequests();
+          loadMyRequests();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, async () => {
+          await loadInventory();
+          renderDashboard();
+          if (document.getElementById('coLoc').value) renderEquipmentPicker();
+          if (document.getElementById('ciLoc').value) renderCheckinPicker();
+          renderRequestPicker();
+        })
         .subscribe();
     }
 
     // ============================================================
-    // CHECKOUT PICKER
+    // CHECKOUT PICKER — BULK + TRACKED
     // ============================================================
     function onSourceLocationChange() {
       selectedEquipment = [];
+      document.getElementById('coPickerSearch').value = '';
       renderSelectedEquipment();
       renderEquipmentPicker();
     }
@@ -835,103 +823,252 @@
       const locSelect = document.getElementById('coLoc');
       const picker = document.getElementById('coEquipPicker');
       const selectedLoc = locSelect.value;
+
       if (!selectedLoc) {
         picker.innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>';
         return;
       }
+
       const available = EQUIPMENT.filter(
         e => e.location === selectedLoc && e.status === 'Available'
       );
+
       if (available.length === 0) {
         picker.innerHTML = '<div class="empty-note">No available equipment at this location.</div>';
         return;
       }
+
+      const bulkItems = available.filter(e => (e.quantity || 1) > 1);
+      const trackedItems = available.filter(e => (e.quantity || 1) === 1);
+
       picker.innerHTML = '';
-      available.forEach(e => {
-        const isChecked = selectedEquipment.some(s => s.id === e.id);
-        const item = document.createElement('div');
-        item.className = 'equip-item';
-        item.innerHTML = `
-          <input type="checkbox" id="chk_${e.id}" ${isChecked ? 'checked' : ''}
-                 onchange="toggleEquipment('${e.id}')">
-          <label for="chk_${e.id}">${e.name}</label>
-          <span class="equip-id">${e.id}</span>
-        `;
-        picker.appendChild(item);
-      });
+
+      // Bulk Items
+      if (bulkItems.length > 0) {
+        const bulkHeader = document.createElement('div');
+        bulkHeader.className = 'section-label';
+        bulkHeader.textContent = 'Bulk Items (enter quantity)';
+        picker.appendChild(bulkHeader);
+
+        bulkItems.forEach(item => {
+          const selected = selectedEquipment.find(s => s.id === item.id);
+          const alreadyAdded = selected ? selected.qty : 0;
+          const totalAvail = item.quantity || 1;
+          const remaining = totalAvail - alreadyAdded;
+
+          let options = '<option value="0">0</option>';
+          for (let i = 1; i <= remaining; i++) {
+            options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
+          }
+
+          const row = document.createElement('div');
+          row.className = 'equip-row';
+          row.innerHTML = `
+            <span class="row-name">${item.name}</span>
+            <span class="row-stock">${totalAvail} available${alreadyAdded > 0 ? ` · ${alreadyAdded} added` : ''}</span>
+            <select class="row-id-select" id="bulk_${item.id}"
+                    onchange="setBulkQty('${item.id}', this.value)">
+              ${options}
+            </select>
+          `;
+          picker.appendChild(row);
+        });
+      }
+
+      // Tracked Items
+      if (trackedItems.length > 0) {
+        const trackedHeader = document.createElement('div');
+        trackedHeader.className = 'section-label';
+        trackedHeader.textContent = 'Tracked Items (select ID)';
+        picker.appendChild(trackedHeader);
+
+        const groups = {};
+        trackedItems.forEach(e => {
+          if (!groups[e.name]) groups[e.name] = [];
+          groups[e.name].push(e);
+        });
+
+        Object.keys(groups).sort().forEach(name => {
+          const items = groups[name];
+          const selectedIds = selectedEquipment.filter(s => s.name === name).map(s => s.id);
+          const unselectedItems = items.filter(i => !selectedIds.includes(i.id));
+
+          const row = document.createElement('div');
+          row.className = 'equip-row' + (unselectedItems.length === 0 ? ' all-selected' : '');
+          const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+
+          const selectedCount = selectedIds.length;
+          const totalCount = items.length;
+          const countLabel = selectedCount > 0
+            ? `${selectedCount}/${totalCount} added`
+            : `${totalCount} available`;
+
+          let dropdownHtml = '';
+          if (unselectedItems.length === 1) {
+            dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
+          } else if (unselectedItems.length > 1) {
+            const options = unselectedItems.map(i =>
+              `<option value="${i.id}">${i.id}</option>`
+            ).join('');
+            dropdownHtml = `<select class="row-id-select" id="sel_${safeId}">${options}</select>`;
+          } else {
+            dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
+          }
+
+          const addBtn = unselectedItems.length > 0
+            ? `<button class="row-add-btn" onclick="addGroupedEquipment('${name.replace(/'/g, "\\'")}')">Add</button>`
+            : '';
+
+          row.innerHTML = `
+            <span class="row-name">${name}</span>
+            <span class="row-stock">${countLabel}</span>
+            ${dropdownHtml}
+            ${addBtn}
+          `;
+          picker.appendChild(row);
+        });
+      }
+
+      filterCoPicker();
     }
 
-    function toggleEquipment(equipId) {
-      const equip = EQUIPMENT.find(e => e.id === equipId);
-      if (!equip) return;
-      const idx = selectedEquipment.findIndex(s => s.id === equipId);
-      if (idx === -1) {
-        selectedEquipment.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1 });
-      } else {
-        selectedEquipment.splice(idx, 1);
+    function setBulkQty(equipId, value) {
+      const item = EQUIPMENT.find(e => e.id === equipId);
+      if (!item) return;
+      const qty = parseInt(value, 10) || 0;
+      selectedEquipment = selectedEquipment.filter(s => s.id !== equipId);
+      if (qty > 0) {
+        selectedEquipment.push({
+          id: item.id, name: item.name, location: item.location,
+          qty: qty, isBulk: true
+        });
       }
       renderSelectedEquipment();
+      renderEquipmentPicker();
     }
 
-    function removeEquipment(equipId) {
+    function addGroupedEquipment(name) {
+      const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+      const sel = document.getElementById('sel_' + safeId);
+      let equipId;
+      if (sel) {
+        equipId = sel.value;
+      } else {
+        const source = document.getElementById('coLoc').value;
+        const items = EQUIPMENT.filter(
+          e => e.name === name && e.location === source && e.status === 'Available'
+        );
+        const selectedIds = selectedEquipment.filter(s => s.name === name).map(s => s.id);
+        const unselected = items.find(i => !selectedIds.includes(i.id));
+        if (!unselected) return;
+        equipId = unselected.id;
+      }
+
+      const equip = EQUIPMENT.find(e => e.id === equipId);
+      if (!equip) return;
+      if (selectedEquipment.some(s => s.id === equip.id)) {
+        alert('That ID is already selected.');
+        return;
+      }
+
+      selectedEquipment.push({
+        id: equip.id, name: equip.name, location: equip.location,
+        qty: 1, isBulk: false
+      });
+
+      renderSelectedEquipment();
+      renderEquipmentPicker();
+    }
+
+    function removeEquipmentGroup(name) {
+      selectedEquipment = selectedEquipment.filter(s => s.name !== name);
+      renderSelectedEquipment();
+      renderEquipmentPicker();
+    }
+
+    function removeBulkItem(equipId) {
       selectedEquipment = selectedEquipment.filter(s => s.id !== equipId);
       renderSelectedEquipment();
       renderEquipmentPicker();
     }
 
-    function updateQty(equipId, delta) {
-      const item = selectedEquipment.find(s => s.id === equipId);
-      if (!item) return;
-      const newQty = (item.qty || 1) + delta;
-      if (newQty >= 1) { item.qty = newQty; renderSelectedEquipment(); }
-    }
-
-    function setQty(equipId, value) {
-      const item = selectedEquipment.find(s => s.id === equipId);
-      if (!item) return;
-      const qty = parseInt(value, 10);
-      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
-      renderSelectedEquipment();
-    }
-
     function renderSelectedEquipment() {
       const list = document.getElementById('coSelectedList');
       const count = document.getElementById('coSelectedCount');
+
       const totalItems = selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0);
       count.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
+
       if (selectedEquipment.length === 0) {
         list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
         return;
       }
+
+      const tracked = selectedEquipment.filter(e => !e.isBulk);
+      const bulk = selectedEquipment.filter(e => e.isBulk);
+
+      const groupedTracked = {};
+      tracked.forEach(e => {
+        if (!groupedTracked[e.name]) groupedTracked[e.name] = [];
+        groupedTracked[e.name].push(e);
+      });
+
       list.innerHTML = '';
-      selectedEquipment.forEach(e => {
-        const qty = e.qty || 1;
+
+      bulk.forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'selected-item';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <span class="name">${e.name}</span>
+            <span class="qty-badge">×${e.qty}</span>
+            <span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span>
+          </div>
+          <button class="remove-btn" onclick="removeBulkItem('${e.id}')">Remove</button>
+        `;
+        list.appendChild(row);
+      });
+
+      Object.keys(groupedTracked).sort().forEach(name => {
+        const items = groupedTracked[name];
+        const qty = items.length;
+        const ids = items.map(i => i.id).join(', ');
+
         const row = document.createElement('div');
         row.className = 'selected-item';
         row.style.flexWrap = 'wrap';
         row.style.gap = '8px';
         row.innerHTML = `
-          <div style="flex:1; min-width:160px;">
-            <span class="name">${e.name}</span>
-            <span class="id">${e.id}</span>
+          <div style="flex:1; min-width:200px;">
+            <span class="name">${name}</span>
+            <span class="qty-badge">×${qty}</span>
+            <div style="font-size:11px; color:#687386; margin-top:4px;">IDs: ${ids}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateQty('${e.id}', -1)">−</button>
-            <input type="number" min="1" value="${qty}" style="width:60px; padding:4px 6px; text-align:center; font-size:14px; border-radius:6px;" onchange="setQty('${e.id}', this.value)">
-            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateQty('${e.id}', 1)">+</button>
-            <button class="remove-btn" onclick="removeEquipment('${e.id}')">Remove</button>
-          </div>
+          <button class="remove-btn" onclick="removeEquipmentGroup('${name.replace(/'/g, "\\'")}')">Remove All</button>
         `;
         list.appendChild(row);
       });
     }
 
+    function filterCoPicker() {
+      const term = (document.getElementById('coPickerSearch')?.value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#coEquipPicker .equip-row');
+      rows.forEach(row => {
+        const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
+        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' +
+                       (row.querySelector('.row-stock')?.textContent || '');
+        const matches = !term || name.includes(term) || idText.toLowerCase().includes(term);
+        row.classList.toggle('hidden', !matches);
+      });
+    }
+
     // ============================================================
-    // CHECK-IN PICKER
+    // CHECK-IN PICKER — BULK + TRACKED
     // ============================================================
     function onReturnLocationChange() {
       selectedCheckinItems = [];
       otherCheckinItems = [];
+      document.getElementById('ciPickerSearch').value = '';
       renderCheckinSelected();
       renderCheckinPicker();
       renderOtherTags();
@@ -941,102 +1078,263 @@
       const locSelect = document.getElementById('ciLoc');
       const picker = document.getElementById('ciEquipPicker');
       const selectedLoc = locSelect.value;
+
       if (!selectedLoc) {
         picker.innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>';
         return;
       }
+
       const itemsAtLoc = EQUIPMENT.filter(e => e.location === selectedLoc);
+
       if (itemsAtLoc.length === 0) {
         picker.innerHTML = '<div class="empty-note">No equipment registered at this location.</div>';
         return;
       }
+
+      const bulkItems = itemsAtLoc.filter(e => (e.quantity || 1) > 1);
+      const trackedItems = itemsAtLoc.filter(e => (e.quantity || 1) === 1);
+
       picker.innerHTML = '';
-      itemsAtLoc.forEach(e => {
-        const isChecked = selectedCheckinItems.some(s => s.id === e.id);
-        const item = document.createElement('div');
-        item.className = 'equip-item';
-        item.innerHTML = `
-          <input type="checkbox" id="ci_chk_${e.id}" ${isChecked ? 'checked' : ''}
-                 onchange="toggleCheckinItem('${e.id}')">
-          <label for="ci_chk_${e.id}">${e.name}</label>
-          <span class="equip-id">${e.id}</span>
-        `;
-        picker.appendChild(item);
-      });
+
+      if (bulkItems.length > 0) {
+        const bulkHeader = document.createElement('div');
+        bulkHeader.className = 'section-label';
+        bulkHeader.textContent = 'Bulk Items (enter quantity)';
+        picker.appendChild(bulkHeader);
+
+        bulkItems.forEach(item => {
+          const selected = selectedCheckinItems.find(s => s.id === item.id);
+          const alreadyAdded = selected ? selected.qty : 0;
+          const totalAvail = item.quantity || 1;
+          const remaining = totalAvail - alreadyAdded;
+
+          let options = '<option value="0">0</option>';
+          for (let i = 1; i <= remaining; i++) {
+            options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
+          }
+
+          const row = document.createElement('div');
+          row.className = 'equip-row';
+          row.innerHTML = `
+            <span class="row-name">${item.name}</span>
+            <span class="row-stock">${totalAvail} total${alreadyAdded > 0 ? ` · ${alreadyAdded} added` : ''}</span>
+            <select class="row-id-select" id="cibulk_${item.id}"
+                    onchange="setCheckinBulkQty('${item.id}', this.value)">
+              ${options}
+            </select>
+          `;
+          picker.appendChild(row);
+        });
+      }
+
+      if (trackedItems.length > 0) {
+        const trackedHeader = document.createElement('div');
+        trackedHeader.className = 'section-label';
+        trackedHeader.textContent = 'Tracked Items (select ID)';
+        picker.appendChild(trackedHeader);
+
+        const groups = {};
+        trackedItems.forEach(e => {
+          if (!groups[e.name]) groups[e.name] = [];
+          groups[e.name].push(e);
+        });
+
+        Object.keys(groups).sort().forEach(name => {
+          const items = groups[name];
+          const selectedIds = selectedCheckinItems.filter(s => s.name === name).map(s => s.id);
+          const unselectedItems = items.filter(i => !selectedIds.includes(i.id));
+
+          const row = document.createElement('div');
+          row.className = 'equip-row' + (unselectedItems.length === 0 ? ' all-selected' : '');
+          const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+
+          const selectedCount = selectedIds.length;
+          const totalCount = items.length;
+          const countLabel = selectedCount > 0
+            ? `${selectedCount}/${totalCount} added`
+            : `${totalCount} total`;
+
+          let dropdownHtml = '';
+          if (unselectedItems.length === 1) {
+            dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
+          } else if (unselectedItems.length > 1) {
+            const options = unselectedItems.map(i =>
+              `<option value="${i.id}">${i.id}</option>`
+            ).join('');
+            dropdownHtml = `<select class="row-id-select" id="cisel_${safeId}">${options}</select>`;
+          } else {
+            dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
+          }
+
+          const addBtn = unselectedItems.length > 0
+            ? `<button class="row-add-btn" onclick="addGroupedCheckin('${name.replace(/'/g, "\\'")}')">Add</button>`
+            : '';
+
+          row.innerHTML = `
+            <span class="row-name">${name}</span>
+            <span class="row-stock">${countLabel}</span>
+            ${dropdownHtml}
+            ${addBtn}
+          `;
+          picker.appendChild(row);
+        });
+      }
+
+      filterCiPicker();
     }
 
-    function toggleCheckinItem(equipId) {
-      const equip = EQUIPMENT.find(e => e.id === equipId);
-      if (!equip) return;
-      const idx = selectedCheckinItems.findIndex(s => s.id === equipId);
-      if (idx === -1) {
-        selectedCheckinItems.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1 });
-      } else {
-        selectedCheckinItems.splice(idx, 1);
+    function setCheckinBulkQty(equipId, value) {
+      const item = EQUIPMENT.find(e => e.id === equipId);
+      if (!item) return;
+      const qty = parseInt(value, 10) || 0;
+      selectedCheckinItems = selectedCheckinItems.filter(s => s.id !== equipId);
+      if (qty > 0) {
+        selectedCheckinItems.push({
+          id: item.id, name: item.name, location: item.location,
+          qty: qty, isBulk: true
+        });
       }
       renderCheckinSelected();
+      renderCheckinPicker();
     }
 
-    function removeCheckinItem(equipId) {
+    function addGroupedCheckin(name) {
+      const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+      const sel = document.getElementById('cisel_' + safeId);
+      let equipId;
+      if (sel) {
+        equipId = sel.value;
+      } else {
+        const loc = document.getElementById('ciLoc').value;
+        const items = EQUIPMENT.filter(e => e.name === name && e.location === loc);
+        const selectedIds = selectedCheckinItems.filter(s => s.name === name).map(s => s.id);
+        const unselected = items.find(i => !selectedIds.includes(i.id));
+        if (!unselected) return;
+        equipId = unselected.id;
+      }
+
+      const equip = EQUIPMENT.find(e => e.id === equipId);
+      if (!equip) return;
+      if (selectedCheckinItems.some(s => s.id === equip.id)) {
+        alert('That ID is already selected.');
+        return;
+      }
+
+      selectedCheckinItems.push({
+        id: equip.id, name: equip.name, location: equip.location,
+        qty: 1, isBulk: false
+      });
+
+      renderCheckinSelected();
+      renderCheckinPicker();
+    }
+
+    function removeCheckinGroup(name) {
+      selectedCheckinItems = selectedCheckinItems.filter(s => s.name !== name);
+      renderCheckinSelected();
+      renderCheckinPicker();
+    }
+
+    function removeCheckinBulk(equipId) {
       selectedCheckinItems = selectedCheckinItems.filter(s => s.id !== equipId);
       renderCheckinSelected();
       renderCheckinPicker();
     }
 
-    function updateCheckinQty(equipId, delta) {
-      const item = selectedCheckinItems.find(s => s.id === equipId);
-      if (!item) return;
-      const newQty = (item.qty || 1) + delta;
-      if (newQty >= 1) { item.qty = newQty; renderCheckinSelected(); }
-    }
-
-    function setCheckinQty(equipId, value) {
-      const item = selectedCheckinItems.find(s => s.id === equipId);
-      if (!item) return;
-      const qty = parseInt(value, 10);
-      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
-      renderCheckinSelected();
-    }
-
     function renderCheckinSelected() {
       const list = document.getElementById('ciSelectedList');
       const count = document.getElementById('ciSelectedCount');
-      const totalItems = selectedCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0) +
-                         otherCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0);
-      count.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
-      if (selectedCheckinItems.length === 0) {
+
+      const total = selectedCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0) +
+                    otherCheckinItems.reduce((sum, e) => sum + e.qty, 0);
+      count.textContent = total + (total === 1 ? ' item' : ' items');
+
+      if (selectedCheckinItems.length === 0 && otherCheckinItems.length === 0) {
         list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
         return;
       }
+
+      const tracked = selectedCheckinItems.filter(e => !e.isBulk);
+      const bulk = selectedCheckinItems.filter(e => e.isBulk);
+
+      const groupedTracked = {};
+      tracked.forEach(e => {
+        if (!groupedTracked[e.name]) groupedTracked[e.name] = [];
+        groupedTracked[e.name].push(e);
+      });
+
       list.innerHTML = '';
-      selectedCheckinItems.forEach(e => {
-        const qty = e.qty || 1;
+
+      bulk.forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'selected-item';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <span class="name">${e.name}</span>
+            <span class="qty-badge">×${e.qty}</span>
+            <span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span>
+          </div>
+          <button class="remove-btn" onclick="removeCheckinBulk('${e.id}')">Remove</button>
+        `;
+        list.appendChild(row);
+      });
+
+      Object.keys(groupedTracked).sort().forEach(name => {
+        const items = groupedTracked[name];
+        const qty = items.length;
+        const ids = items.map(i => i.id).join(', ');
+
         const row = document.createElement('div');
         row.className = 'selected-item';
         row.style.flexWrap = 'wrap';
         row.style.gap = '8px';
         row.innerHTML = `
-          <div style="flex:1; min-width:160px;">
-            <span class="name">${e.name}</span>
-            <span class="id">${e.id}</span>
+          <div style="flex:1; min-width:200px;">
+            <span class="name">${name}</span>
+            <span class="qty-badge">×${qty}</span>
+            <div style="font-size:11px; color:#687386; margin-top:4px;">IDs: ${ids}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateCheckinQty('${e.id}', -1)">−</button>
-            <input type="number" min="1" value="${qty}" style="width:60px; padding:4px 6px; text-align:center; font-size:14px; border-radius:6px;" onchange="setCheckinQty('${e.id}', this.value)">
-            <button class="small-btn" style="padding:4px 10px; font-size:14px;" onclick="updateCheckinQty('${e.id}', 1)">+</button>
-            <button class="remove-btn" onclick="removeCheckinItem('${e.id}')">Remove</button>
+          <button class="remove-btn" onclick="removeCheckinGroup('${name.replace(/'/g, "\\'")}')">Remove All</button>
+        `;
+        list.appendChild(row);
+      });
+
+      otherCheckinItems.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'selected-item';
+        row.innerHTML = `
+          <div style="flex:1;">
+            <span class="name">${item.name}</span>
+            <span class="qty-badge">×${item.qty}</span>
+            <span style="font-size:11px;color:#b85c00;margin-left:6px;">[other]</span>
           </div>
+          <button class="remove-btn" onclick="removeOtherCheckinItem(${i})">Remove</button>
         `;
         list.appendChild(row);
       });
     }
 
+    function filterCiPicker() {
+      const term = (document.getElementById('ciPickerSearch')?.value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#ciEquipPicker .equip-row');
+      rows.forEach(row => {
+        const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
+        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' +
+                       (row.querySelector('.row-stock')?.textContent || '');
+        const matches = !term || name.includes(term) || idText.toLowerCase().includes(term);
+        row.classList.toggle('hidden', !matches);
+      });
+    }
+
+    // ============================================================
+    // OTHER CHECK-IN ITEMS
+    // ============================================================
     function addOtherCheckinItem() {
       const nameInput = document.getElementById('ciOtherName');
       const qtyInput = document.getElementById('ciOtherQty');
       const name = nameInput.value.trim();
       const qty = parseInt(qtyInput.value, 10) || 1;
-      if (!name) { alert('Please enter a name or description for the other equipment.'); return; }
+      if (!name) { alert('Please enter a name or description.'); return; }
       otherCheckinItems.push({ name, qty });
       nameInput.value = '';
       qtyInput.value = '1';
@@ -1063,104 +1361,134 @@
     }
 
     // ============================================================
-    // PRE-REQUEST CART
+    // PRE-REQUEST PICKER — TOTAL + AVAILABLE
     // ============================================================
-    function populateRequestEquipSelect() {
-      const sel = document.getElementById('rqEquipSelect');
-      sel.innerHTML = '';
-      const available = EQUIPMENT.filter(e => e.status === 'Available');
-      if (available.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = '— No equipment available —';
-        opt.disabled = true;
-        sel.appendChild(opt);
+    function renderRequestPicker() {
+      const picker = document.getElementById('rqEquipPicker');
+      if (!picker) return;
+
+      const groups = {};
+      EQUIPMENT.forEach(e => {
+        if (!groups[e.name]) {
+          groups[e.name] = { total: 0, available: 0 };
+        }
+        const q = e.quantity || 1;
+        groups[e.name].total += q;
+        if (e.status === 'Available') {
+          groups[e.name].available += q;
+        }
+      });
+
+      const names = Object.keys(groups).sort();
+      if (names.length === 0) {
+        picker.innerHTML = '<div class="empty-note">No equipment in inventory.</div>';
         return;
       }
-      const grouped = {};
-      available.forEach(e => {
-        if (!grouped[e.location]) grouped[e.location] = [];
-        grouped[e.location].push(e);
+
+      picker.innerHTML = '';
+      names.forEach(name => {
+        const { total, available } = groups[name];
+        const inCart = requestCart.find(c => c.name === name);
+        const alreadyAdded = inCart ? inCart.qty : 0;
+        const remaining = Math.max(0, available - alreadyAdded);
+
+        let options = '<option value="0">0</option>';
+        for (let i = 1; i <= remaining; i++) {
+          options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
+        }
+
+        const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+        const row = document.createElement('div');
+        row.className = 'equip-row';
+
+        let label = `Total: <strong>${total}</strong> · Available: <strong>${available}</strong>`;
+        if (alreadyAdded > 0) {
+          label += ` · In Cart: <strong style="color:#1769e0;">${alreadyAdded}</strong>`;
+        }
+        if (available === 0) {
+          label = `<span style="color:#b91c1c;">Total: ${total} · All checked out</span>`;
+        }
+
+        const disabled = available === 0 ? ' disabled' : '';
+
+        row.innerHTML = `
+          <span class="row-name">${name}</span>
+          <span class="row-stock">${label}</span>
+          <select class="row-id-select" id="rqsel_${safeId}"${disabled}
+                  onchange="setRequestQty('${name.replace(/'/g, "\\'")}', this.value)">
+            ${options}
+          </select>
+        `;
+        picker.appendChild(row);
       });
-      Object.keys(grouped).forEach(loc => {
-        const group = document.createElement('optgroup');
-        group.label = loc;
-        grouped[loc].forEach(e => {
-          const opt = document.createElement('option');
-          opt.value = e.id;
-          opt.textContent = `${e.name} (${e.id})`;
-          group.appendChild(opt);
-        });
-        sel.appendChild(group);
-      });
+
+      filterRqPicker();
     }
 
-    function addRequestItem() {
-      const sel = document.getElementById('rqEquipSelect');
-      const qtyInput = document.getElementById('rqEquipQty');
-      const equipId = sel.value;
-      const qty = parseInt(qtyInput.value, 10) || 1;
-      if (!equipId) { alert('Please select an equipment item.'); return; }
-      const equip = EQUIPMENT.find(e => e.id === equipId);
-      if (!equip) return;
-      const existing = requestCart.find(item => item.id === equipId);
-      if (existing) {
-        existing.qty += qty;
-      } else {
-        requestCart.push({ id: equip.id, name: equip.name, location: equip.location, qty });
+    function setRequestQty(name, value) {
+      const qty = parseInt(value, 10) || 0;
+      requestCart = requestCart.filter(c => c.name !== name);
+      if (qty > 0) {
+        requestCart.push({ name: name, qty: qty });
       }
-      qtyInput.value = '1';
       renderRequestCart();
-    }
-
-    function removeRequestItem(equipId) {
-      requestCart = requestCart.filter(item => item.id !== equipId);
-      renderRequestCart();
-    }
-
-    function updateRequestQty(equipId, value) {
-      const item = requestCart.find(i => i.id === equipId);
-      if (!item) return;
-      const qty = parseInt(value, 10);
-      item.qty = (!isNaN(qty) && qty >= 1) ? qty : 1;
-      renderRequestCart();
+      renderRequestPicker();
     }
 
     function renderRequestCart() {
       const cart = document.getElementById('rqCart');
       if (requestCart.length === 0) {
-        cart.innerHTML = '<div class="req-cart-empty">No items added yet. Use the form above to add equipment.</div>';
+        cart.innerHTML = '<div class="req-cart-empty">No items added yet.</div>';
         return;
       }
+
       cart.innerHTML = '';
       requestCart.forEach(item => {
+        const total = EQUIPMENT
+          .filter(e => e.name === item.name)
+          .reduce((sum, e) => sum + (e.quantity || 1), 0);
+        const available = EQUIPMENT
+          .filter(e => e.name === item.name && e.status === 'Available')
+          .reduce((sum, e) => sum + (e.quantity || 1), 0);
+
         const row = document.createElement('div');
         row.className = 'req-item-row';
         row.innerHTML = `
           <div class="req-name">${item.name}</div>
-          <span class="req-id">${item.id}</span>
-          <input type="number" min="1" value="${item.qty}" onchange="updateRequestQty('${item.id}', this.value)">
-          <button class="remove-btn" onclick="removeRequestItem('${item.id}')">Remove</button>
+          <span style="font-size:11px;color:#687386;">${available}/${total} available</span>
+          <span class="qty-badge">×${item.qty}</span>
+          <button class="remove-btn" onclick="setRequestQty('${item.name.replace(/'/g, "\\'")}', 0)">Remove</button>
         `;
         cart.appendChild(row);
       });
     }
 
+    function filterRqPicker() {
+      const term = (document.getElementById('rqPickerSearch')?.value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#rqEquipPicker .equip-row');
+      rows.forEach(row => {
+        const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
+        row.classList.toggle('hidden', !(!term || name.includes(term)));
+      });
+    }
+
     // ============================================================
-    // DASHBOARD + SORTING
+    // DASHBOARD
     // ============================================================
     function renderDashboard() {
-      const totalItems = EQUIPMENT.length;
-      const availableItems = EQUIPMENT.filter(e => e.status === 'Available').length;
-      const outItems = EQUIPMENT.filter(e => e.status === 'Checked Out').length;
+      const totalItems = EQUIPMENT.reduce((sum, e) => sum + (e.quantity || 1), 0);
+      const availableItems = EQUIPMENT
+        .filter(e => e.status === 'Available')
+        .reduce((sum, e) => sum + (e.quantity || 1), 0);
+      const outItems = EQUIPMENT
+        .filter(e => e.status === 'Checked Out')
+        .reduce((sum, e) => sum + (e.quantity || 1), 0);
       const locationCount = CHECKOUT_LOCATIONS.length;
-
       document.getElementById('total').textContent = totalItems;
       document.getElementById('available').textContent = availableItems;
       document.getElementById('out').textContent = outItems;
       document.getElementById('locations').textContent = locationCount;
 
-      // Populate location filter (once)
       const locFilter = document.getElementById('invLocationFilter');
       if (locFilter && locFilter.options.length <= 1) {
         const uniqueLocs = [...new Set(EQUIPMENT.map(e => e.location))].sort();
@@ -1171,7 +1499,6 @@
           locFilter.appendChild(opt);
         });
       }
-
       renderInventoryTable();
     }
 
@@ -1184,11 +1511,9 @@
       let items = [...EQUIPMENT];
       if (statusFilter) items = items.filter(e => e.status === statusFilter);
       if (locationFilter) items = items.filter(e => e.location === locationFilter);
-      if (search) {
-        items = items.filter(e =>
-          e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search)
-        );
-      }
+      if (search) items = items.filter(e =>
+        e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search)
+      );
 
       items.sort((a, b) => {
         switch (sortKey) {
@@ -1196,20 +1521,18 @@
           case 'id-desc': return b.id.localeCompare(a.id);
           case 'name': return a.name.localeCompare(b.name);
           case 'location': return a.location.localeCompare(b.location) || a.id.localeCompare(b.id);
-          case 'status':
-            if (a.status === b.status) return a.id.localeCompare(b.id);
-            return a.status === 'Available' ? -1 : 1;
+          case 'status': return a.status === b.status ? a.id.localeCompare(b.id) : (a.status === 'Available' ? -1 : 1);
           default: return 0;
         }
       });
 
       const countEl = document.getElementById('invCount');
-      if (countEl) countEl.textContent = items.length + (items.length === 1 ? ' item' : ' items');
+      if (countEl) countEl.textContent = items.length + (items.length === 1 ? ' row' : ' rows');
 
       const tbody = document.getElementById('inv');
       tbody.innerHTML = '';
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match your filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match your filters.</td></tr>`;
         return;
       }
       items.forEach(e => {
@@ -1218,6 +1541,7 @@
           <td><strong>${e.id}</strong></td>
           <td>${e.name}</td>
           <td>${e.location}</td>
+          <td>${e.quantity || 1}</td>
           <td><span class="status-badge ${e.status === 'Checked Out' ? 'out' : ''}">${e.status}</span></td>
         `;
         tbody.appendChild(tr);
@@ -1268,10 +1592,7 @@
     }
 
     function goToPending() {
-      if (!currentUser) {
-        openLogin();
-        return;
-      }
+      if (!currentUser) { openLogin(); return; }
       show('pendingRequests');
     }
 
@@ -1344,17 +1665,32 @@
       if (!name) { alert('Please enter your name.'); return; }
       if (!checkoutDate) { alert('Please select a checkout date.'); return; }
 
+      const equipmentStr = selectedEquipment.map(e =>
+        e.isBulk
+          ? `${e.name} (x${e.qty}) [bulk]`
+          : `${e.name} (${e.id}) (x1)`
+      ).join('; ');
+
+      const totalQty = selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0);
+
       setButtonLoading('coSubmitBtn', true);
       const { error } = await sb.from('transactions').insert({
         type: 'checkout',
         name: name,
         source: source,
         destination: destination,
-        equipment: selectedEquipment.map(e => `${e.name} (x${e.qty || 1})`).join('; '),
-        quantity: selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0),
+        equipment: equipmentStr,
+        quantity: totalQty,
         notes: document.getElementById('coNotes').value,
         checkout_date: checkoutDate
       });
+
+      // Mark tracked items as Checked Out
+      const trackedIds = selectedEquipment.filter(e => !e.isBulk).map(e => e.id);
+      if (trackedIds.length > 0) {
+        await sb.from('inventory').update({ status: 'Checked Out' }).in('equipment_id', trackedIds);
+      }
+
       setButtonLoading('coSubmitBtn', false);
 
       if (error) {
@@ -1363,6 +1699,7 @@
         return;
       }
       showMsgWithError('coMsg', false);
+
       selectedEquipment = [];
       renderSelectedEquipment();
       renderEquipmentPicker();
@@ -1373,8 +1710,11 @@
       document.getElementById('coName').value = '';
       document.getElementById('coPurpose').value = '';
       document.getElementById('coNotes').value = '';
+      document.getElementById('coPickerSearch').value = '';
       document.getElementById('coEquipPicker').innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>';
       setDatesToToday();
+      await loadInventory();
+      renderDashboard();
     }
 
     // ============================================================
@@ -1395,9 +1735,16 @@
       if (!returnDate) { alert('Please select a return date.'); return; }
 
       const allItems = [
-        ...selectedCheckinItems.map(e => `${e.name} (${e.id}) (x${e.qty || 1})`),
-        ...otherCheckinItems.map(e => `${e.name} (x${e.qty || 1}) [other]`)
+        ...selectedCheckinItems.map(e =>
+          e.isBulk
+            ? `${e.name} (x${e.qty}) [bulk]`
+            : `${e.name} (${e.id}) (x1)`
+        ),
+        ...otherCheckinItems.map(e => `${e.name} (x${e.qty}) [other]`)
       ];
+
+      const totalQty = selectedCheckinItems.reduce((s, e) => s + (e.qty || 1), 0) +
+                       otherCheckinItems.reduce((s, e) => s + e.qty, 0);
 
       setButtonLoading('ciSubmitBtn', true);
       const { error } = await sb.from('transactions').insert({
@@ -1405,13 +1752,19 @@
         name: returner,
         source: loc,
         equipment: allItems.join('; '),
-        quantity: selectedCheckinItems.reduce((s, e) => s + (e.qty || 1), 0) +
-                  otherCheckinItems.reduce((s, e) => s + (e.qty || 1), 0),
+        quantity: totalQty,
         condition: condition,
         damage_notes: damageNotes,
         notes: document.getElementById('ciNotes').value,
         return_date: returnDate
       });
+
+      // Mark tracked items back to Available
+      const trackedIds = selectedCheckinItems.filter(e => !e.isBulk).map(e => e.id);
+      if (trackedIds.length > 0) {
+        await sb.from('inventory').update({ status: 'Available' }).in('equipment_id', trackedIds);
+      }
+
       setButtonLoading('ciSubmitBtn', false);
 
       if (error) {
@@ -1432,8 +1785,11 @@
       document.getElementById('ciDamageNotes').value = '';
       document.getElementById('ciDamageSection').classList.remove('active');
       document.getElementById('ciNotes').value = '';
+      document.getElementById('ciPickerSearch').value = '';
       document.getElementById('ciEquipPicker').innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>';
       setDatesToToday();
+      await loadInventory();
+      renderDashboard();
     }
 
     // ============================================================
@@ -1453,8 +1809,8 @@
       const notes = document.getElementById('rqNotes').value.trim();
 
       if (!name) { alert('Please enter your name before submitting.'); return; }
-      if (requestCart.length === 0) { alert('Please add at least one equipment item to your request.'); return; }
-      if (!useLocation) { alert('Please select or enter the location where the equipment will be used.'); return; }
+      if (requestCart.length === 0) { alert('Please add at least one equipment item.'); return; }
+      if (!useLocation) { alert('Please select or enter the usage location.'); return; }
 
       setButtonLoading('rqSubmitBtn', true);
       const { error } = await sb.from('requests').insert({
@@ -1478,6 +1834,7 @@
 
       requestCart = [];
       renderRequestCart();
+      renderRequestPicker();
       document.getElementById('rqName').value = '';
       document.getElementById('rqDateNeeded').value = '';
       document.getElementById('rqReturn').value = '';
@@ -1485,8 +1842,7 @@
       document.getElementById('rqUseLocationOther').value = '';
       document.getElementById('rqUseLocationOtherWrap').style.display = 'none';
       document.getElementById('rqNotes').value = '';
-      document.getElementById('rqEquipQty').value = '1';
-
+      document.getElementById('rqPickerSearch').value = '';
       await loadMyRequests();
     }
 
@@ -1512,8 +1868,10 @@
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
       const todayStr = `${yyyy}-${mm}-${dd}`;
-      document.getElementById('coDate').value = todayStr;
-      document.getElementById('ciReturnDate').value = todayStr;
+      const coDate = document.getElementById('coDate');
+      const ciDate = document.getElementById('ciReturnDate');
+      if (coDate) coDate.value = todayStr;
+      if (ciDate) ciDate.value = todayStr;
     }
 
     // ============================================================
@@ -1526,7 +1884,7 @@
       populateUsageLocations();
 
       await loadInventory();
-      populateRequestEquipSelect();
+      renderRequestPicker();
       renderRequestCart();
       renderDashboard();
       setDatesToToday();
