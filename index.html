@@ -1212,16 +1212,50 @@
     }
 
     async function approveRequest(id) {
-      const { error } = await sb.from('requests').update({ status: 'Approved' }).eq('id', id);
-      if (error) { alert('Failed to approve: ' + error.message); return; }
-      await loadPendingRequests();
-    }
+  if (!currentUser) {
+    alert('Please sign in as Admin first.');
+    openLogin();
+    return;
+  }
+  console.log('✅ Approving request ID:', id);
+  const { data, error } = await sb
+    .from('requests')
+    .update({ status: 'Approved' })
+    .eq('id', id)
+    .select();
 
-    async function denyRequest(id) {
-      const { error } = await sb.from('requests').update({ status: 'Denied' }).eq('id', id);
-      if (error) { alert('Failed to deny: ' + error.message); return; }
-      await loadPendingRequests();
-    }
+  if (error) {
+    console.error('❌ Approve failed:', error);
+    alert('Failed to approve: ' + error.message);
+    return;
+  }
+  console.log('✅ Approved:', data);
+  await loadPendingRequests();
+  await loadMyRequests();
+}
+
+   async function denyRequest(id) {
+  if (!currentUser) {
+    alert('Please sign in as Admin first.');
+    openLogin();
+    return;
+  }
+  console.log('❌ Denying request ID:', id);
+  const { data, error } = await sb
+    .from('requests')
+    .update({ status: 'Denied' })
+    .eq('id', id)
+    .select();
+
+  if (error) {
+    console.error('❌ Deny failed:', error);
+    alert('Failed to deny: ' + error.message);
+    return;
+  }
+  console.log('❌ Denied:', data);
+  await loadPendingRequests();
+  await loadMyRequests();
+}
 
     function renderMyRequests() {
       const container = document.getElementById('myRequestsList');
