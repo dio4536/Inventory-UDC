@@ -535,32 +535,44 @@
       if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
     }
 
-    function setRole(role) {
-      currentRole = role;
-      document.body.className = 'role-' + role;
-      document.getElementById('roleBtnAdmin').classList.toggle('active', role === 'admin');
-      document.getElementById('roleBtnUser').classList.toggle('active', role === 'user');
-      document.getElementById('heroTitle').textContent = role === 'admin' ? 'Equipment Management' : 'Equipment Requests';
-      document.getElementById('heroSub').textContent = role === 'admin' ? 'Manage checkouts, returns, and student requests.' : 'Request equipment for your event or activity.';
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      if (role === 'admin') {
-        document.getElementById('dashboard').classList.add('active');
-        if (!currentUser) openLogin();
-      } else {
-        document.getElementById('myRequests').classList.add('active');
-      }
-    }
+    async function setRole(role) {
+  currentRole = role;
+  document.body.className = 'role-' + role;
+  document.getElementById('roleBtnAdmin').classList.toggle('active', role === 'admin');
+  document.getElementById('roleBtnUser').classList.toggle('active', role === 'user');
+  document.getElementById('heroTitle').textContent = role === 'admin' ? 'Equipment Management' : 'Equipment Requests';
+  document.getElementById('heroSub').textContent = role === 'admin' ? 'Manage checkouts, returns, and student requests.' : 'Request equipment for your event or activity.';
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if (role === 'admin') {
+    document.getElementById('dashboard').classList.add('active');
+    if (!currentUser) openLogin();
+  } else {
+    document.getElementById('myRequests').classList.add('active');
+    await loadMyRequests();  // ← NEW: reload requests when switching to user
+  }
+}
 
-    function show(panelId) {
-      const panel = document.getElementById(panelId);
-      if (!panel) return;
-      if (panel.classList.contains('admin-only') && currentRole !== 'admin') return;
-      if (panel.classList.contains('user-only') && currentRole !== 'user') return;
-      if (currentRole === 'admin' && !currentUser && panelId === 'pendingRequests') { openLogin(); return; }
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      panel.classList.add('active');
-      document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
-    }
+    async function show(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  if (panel.classList.contains('admin-only') && currentRole !== 'admin') return;
+  if (panel.classList.contains('user-only') && currentRole !== 'user') return;
+  if (currentRole === 'admin' && !currentUser && panelId === 'pendingRequests') {
+    openLogin();
+    return;
+  }
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  panel.classList.add('active');
+  document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
+
+  // Reload data when certain panels open
+  if (panelId === 'myRequests') {
+    await loadMyRequests();
+  }
+  if (panelId === 'pendingRequests' && currentUser) {
+    await loadPendingRequests();
+  }
+}
 
     function hide(panelId) {
       const panel = document.getElementById(panelId);
