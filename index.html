@@ -1686,10 +1686,37 @@
       });
 
       // Mark tracked items as Checked Out
-      const trackedIds = selectedEquipment.filter(e => !e.isBulk).map(e => e.id);
-      if (trackedIds.length > 0) {
-        await sb.from('inventory').update({ status: 'Checked Out' }).in('equipment_id', trackedIds);
-      }
+const trackedIds = selectedEquipment.filter(e => !e.isBulk).map(e => e.id);
+if (trackedIds.length > 0) {
+  const { data: updateData, error: updateError } = await sb
+    .from('inventory')
+    .update({ status: 'Checked Out' })
+    .in('equipment_id', trackedIds)
+    .select();  // returns the updated rows so we can see if it worked
+
+  if (updateError) {
+    console.error('❌ Failed to update inventory status:', updateError);
+    alert('Checkout was logged, but marking items as Checked Out failed: ' + updateError.message);
+  } else {
+    console.log('✅ Inventory status updated for:', updateData);
+  }
+}
+      // Mark tracked items back to Available
+const trackedIds = selectedCheckinItems.filter(e => !e.isBulk).map(e => e.id);
+if (trackedIds.length > 0) {
+  const { data: updateData, error: updateError } = await sb
+    .from('inventory')
+    .update({ status: 'Available' })
+    .in('equipment_id', trackedIds)
+    .select();
+
+  if (updateError) {
+    console.error('❌ Failed to update inventory status:', updateError);
+    alert('Check-in was logged, but resetting items to Available failed: ' + updateError.message);
+  } else {
+    console.log('✅ Inventory status updated for:', updateData);
+  }
+}
 
       setButtonLoading('coSubmitBtn', false);
 
