@@ -428,6 +428,15 @@
   </main>
 
   <script>
+    // Generate or retrieve a persistent browser session ID
+function getSessionId() {
+  let sid = localStorage.getItem('udc_requester_id');
+  if (!sid) {
+    sid = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem('udc_requester_id', sid);
+  }
+  return sid;
+}
     const SUPABASE_URL = 'https://yktofqgwbvwobrjdbeyd.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_9Yht9rutC0RQjDI0h_AmVA_8VQSbV2s';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
