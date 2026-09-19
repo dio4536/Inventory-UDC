@@ -59,11 +59,6 @@
     .flex-btn { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
     .btn-secondary { background: #e9edf5; color: #172033; }
     .equip-picker { border: 1px solid #cbd3e1; border-radius: 9px; padding: 10px; max-height: 340px; overflow-y: auto; background: #fff; }
-    .equip-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: background 0.12s; font-size: 14px; }
-    .equip-item:hover { background: #f1f4fa; }
-    .equip-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
-    .equip-item label { margin: 0; font-weight: 500; cursor: pointer; flex: 1; }
-    .equip-item .equip-id { font-size: 11px; color: #687386; font-weight: 700; background: #f1f4fa; padding: 2px 8px; border-radius: 20px; }
     .empty-note { padding: 14px; color: #8b95a5; font-size: 13px; text-align: center; font-style: italic; }
     .selected-window { margin-top: 18px; border: 1px solid #cbd3e1; border-radius: 12px; background: #f9fbfe; overflow: hidden; }
     .selected-window-header { background: #1769e0; color: #fff; padding: 10px 16px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
@@ -87,10 +82,6 @@
     .req-item-row { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e8ee; }
     .req-item-row:last-child { border-bottom: none; }
     .req-item-row .req-name { flex: 1; font-weight: 600; font-size: 14px; }
-    .req-item-row .req-id { font-size: 11px; color: #687386; font-weight: 700; background: #f1f4fa; padding: 2px 8px; border-radius: 20px; }
-    .req-item-row input[type="number"] { width: 70px; padding: 6px 8px; text-align: center; font-size: 14px; }
-    .req-add-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-    .req-add-row > div { flex: 1; min-width: 180px; }
     .req-cart-empty { padding: 16px; text-align: center; color: #8b95a5; font-size: 13px; font-style: italic; border: 1px dashed #cbd3e1; border-radius: 9px; }
     body.role-user .admin-only { display: none !important; }
     body.role-admin .user-only { display: none !important; }
@@ -117,8 +108,6 @@
     .toolbar select, .toolbar input { padding: 8px 10px; font-size: 13px; border-radius: 7px; border: 1px solid #cbd3e1; width: auto; min-width: 140px; }
     .toolbar input[type="text"] { min-width: 200px; flex: 1; }
     .toolbar .result-count { margin-left: auto; font-size: 12px; font-weight: 700; color: #687386; }
-
-    /* GROUPED PICKER */
     .picker-search { width: 100%; padding: 10px 12px; margin-bottom: 10px; border: 1px solid #cbd3e1; border-radius: 8px; font-size: 14px; font-family: inherit; }
     .picker-search:focus { outline: none; border-color: #1769e0; box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.1); }
     .equip-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f0f3f8; font-size: 14px; flex-wrap: wrap; }
@@ -133,20 +122,17 @@
     .equip-row.hidden { display: none; }
     .qty-badge { background: #eef4ff; color: #1769e0; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 6px; }
     .section-label { font-size: 11px; font-weight: 700; color: #687386; padding: 10px 10px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
     @media (max-width: 700px) {
       .top { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 10px; }
       .actions, .cards, .grid { grid-template-columns: 1fr; }
       .hero { padding: 22px; }
       .panel { padding: 22px; }
       h1 { font-size: 26px; }
-      .req-add-row { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body class="role-admin">
 
-  <!-- LOGIN MODAL -->
   <div class="login-overlay" id="loginOverlay" style="display:none;">
     <div class="login-modal">
       <h2>Admin Login</h2>
@@ -193,7 +179,6 @@
       </div>
     </section>
 
-    <!-- CHECKOUT PANEL -->
     <section id="checkout" class="panel">
       <h2>Check Out Equipment</h2>
       <div class="grid">
@@ -213,9 +198,7 @@
         <input id="coDestinationOther" placeholder="Type custom destination...">
       </div>
       <h3>Select Equipment</h3>
-      <input type="text" class="picker-search" id="coPickerSearch"
-             placeholder="🔍 Search by equipment name or ID..."
-             oninput="filterCoPicker()">
+      <input type="text" class="picker-search" id="coPickerSearch" placeholder="🔍 Search by equipment name or ID..." oninput="filterCoPicker()">
       <div id="coEquipPicker" class="equip-picker">
         <div class="empty-note">Select a checkout location above to see available equipment.</div>
       </div>
@@ -253,7 +236,6 @@
       <div id="coMsg" class="msg">Checkout submitted successfully.</div>
     </section>
 
-    <!-- CHECKIN PANEL -->
     <section id="checkin" class="panel">
       <h2>Check In Equipment</h2>
       <div class="grid">
@@ -271,9 +253,7 @@
         </div>
       </div>
       <h3>Select Equipment to Return</h3>
-      <input type="text" class="picker-search" id="ciPickerSearch"
-             placeholder="🔍 Search by equipment name or ID..."
-             oninput="filterCiPicker()">
+      <input type="text" class="picker-search" id="ciPickerSearch" placeholder="🔍 Search by equipment name or ID..." oninput="filterCiPicker()">
       <div id="ciEquipPicker" class="equip-picker">
         <div class="empty-note">Select a return location above to see equipment.</div>
       </div>
@@ -320,7 +300,6 @@
       <div id="ciMsg" class="msg">Check-in submitted successfully.</div>
     </section>
 
-    <!-- PRE-REQUEST PANEL -->
     <section id="request" class="panel">
       <h2>Equipment Pre-Request</h2>
       <div class="grid">
@@ -348,9 +327,7 @@
         <input id="rqUseLocationOther" placeholder="Type custom usage location...">
       </div>
       <h3>Requested Equipment</h3>
-      <input type="text" class="picker-search" id="rqPickerSearch"
-             placeholder="🔍 Search by equipment name..."
-             oninput="filterRqPicker()">
+      <input type="text" class="picker-search" id="rqPickerSearch" placeholder="🔍 Search by equipment name..." oninput="filterRqPicker()">
       <div id="rqEquipPicker" class="equip-picker" style="max-height:300px;">
         <div class="empty-note">Loading equipment...</div>
       </div>
@@ -366,7 +343,6 @@
       <div id="rqMsg" class="msg">Pre-request submitted successfully.</div>
     </section>
 
-    <!-- ADMIN DASHBOARD -->
     <section class="panel active admin-only" id="dashboard">
       <h2>Admin Dashboard</h2>
       <div class="cards">
@@ -388,23 +364,23 @@
         </div>
       </div>
       <div class="toolbar">
-        <label>Filter by Status</label>
+        <label>Status</label>
         <select id="invStatusFilter" onchange="renderInventoryTable()">
           <option value="">All</option>
           <option value="Available">Available</option>
           <option value="Checked Out">Checked Out</option>
         </select>
-        <label>Filter by Location</label>
+        <label>Location</label>
         <select id="invLocationFilter" onchange="renderInventoryTable()">
           <option value="">All Locations</option>
         </select>
         <label>Sort</label>
         <select id="invSort" onchange="renderInventoryTable()">
-          <option value="id">Equipment ID (A–Z)</option>
-          <option value="id-desc">Equipment ID (Z–A)</option>
+          <option value="id">ID (A–Z)</option>
+          <option value="id-desc">ID (Z–A)</option>
           <option value="name">Name (A–Z)</option>
           <option value="location">Location (A–Z)</option>
-          <option value="status">Status (Available first)</option>
+          <option value="status">Status</option>
         </select>
         <input type="text" id="invSearch" placeholder="Search ID or name..." oninput="renderInventoryTable()">
         <span class="result-count" id="invCount">0 items</span>
@@ -423,7 +399,6 @@
       </table>
     </section>
 
-    <!-- ADMIN: PENDING PRE-REQUESTS -->
     <section class="panel admin-only" id="pendingRequests">
       <h2><span class="live-dot"></span>Pending Pre-Requests</h2>
       <p style="font-size:14px; color:#5c667a; margin-bottom:10px;">Live updates — new requests appear automatically.</p>
@@ -439,16 +414,11 @@
           </tr>
         </thead>
         <tbody id="pendingTable">
-          <tr>
-            <td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">
-              No pending requests at this time.
-            </td>
-          </tr>
+          <tr><td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No pending requests at this time.</td></tr>
         </tbody>
       </table>
     </section>
 
-    <!-- USER: MY REQUESTS -->
     <section class="panel user-only" id="myRequests">
       <h2>My Pre-Requests</h2>
       <div id="myRequestsList">
@@ -458,47 +428,34 @@
   </main>
 
   <script>
-    // ============================================================
-    // SUPABASE CONFIGURATION
-    // ============================================================
     const SUPABASE_URL = 'https://yktofqgwbvwobrjdbeyd.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_9Yht9rutC0RQjDI0h_AmVA_8VQSbV2s';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ============================================================
-    // CONSTANTS
-    // ============================================================
-    const CHECKOUT_LOCATIONS = [
-      "B-Level storage",
-      "C-Level storage",
-      "Ballroom storage",
-      "Ballroom AV closet"
-    ];
-
+    const CHECKOUT_LOCATIONS = ["B-Level storage","C-Level storage","Ballroom storage","Ballroom AV closet"];
     const DESTINATION_LOCATIONS = [
-      "Ballroom A",
-      "Ballroom B",
-      "Pre Function Ballroom",
-      "Tower Conference 101",
-      "Executive Conference 110",
-      "Study Room 103",
-      "Study Room – 132",
-      "Room A01",
-      "Heritage Hall",
-      "Sudent Lounge",
-      "Student Center GYM",
-      "Student Center- Atrium",
-      "Student Center- A-Level Plaza",
-      "Window Lounge",
-      "Denard Plaza",
-      "Greek Row",
-      "Theater of Arts",
-      "Ample Theater",
-      "Theater – Backstage",
-      "Black Box",
-      "Other"
-    ];
-
+  "Ballroom A",
+  "Ballroom B",
+  "Pre Function Ballroom",
+  "Tower Conference 101",
+  "Executive Conference 110",
+  "Study Room 103",
+  "Study Room – 132",
+  "Room A01",
+  "Heritage Hall",
+  "Sudent Lounge",
+  "Student Center GYM",
+  "Student Center- Atrium",
+  "Student Center- A-Level Plaza",
+  "Window Lounge",
+  "Denard Plaza",
+  "Greek Row",
+  "Theater of Arts",
+  "Ample Theater",
+  "Theater – Backstage",
+  "Black Box",
+  "Other"
+];
     let EQUIPMENT = [];
     let selectedEquipment = [];
     let selectedCheckinItems = [];
@@ -510,9 +467,6 @@
     let currentUser = null;
     let realtimeChannel = null;
 
-    // ============================================================
-    // AUTHENTICATION
-    // ============================================================
     async function checkAuth() {
       const { data: { session } } = await sb.auth.getSession();
       currentUser = session ? session.user : null;
@@ -578,26 +532,16 @@
       myRequests = [];
       renderPendingRequests();
       renderMyRequests();
-      if (realtimeChannel) {
-        sb.removeChannel(realtimeChannel);
-        realtimeChannel = null;
-      }
+      if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
     }
 
-    // ============================================================
-    // ROLE SWITCHING
-    // ============================================================
     function setRole(role) {
       currentRole = role;
       document.body.className = 'role-' + role;
       document.getElementById('roleBtnAdmin').classList.toggle('active', role === 'admin');
       document.getElementById('roleBtnUser').classList.toggle('active', role === 'user');
-      document.getElementById('heroTitle').textContent =
-        role === 'admin' ? 'Equipment Management' : 'Equipment Requests';
-      document.getElementById('heroSub').textContent =
-        role === 'admin'
-          ? 'Manage checkouts, returns, and student requests.'
-          : 'Request equipment for your event or activity.';
+      document.getElementById('heroTitle').textContent = role === 'admin' ? 'Equipment Management' : 'Equipment Requests';
+      document.getElementById('heroSub').textContent = role === 'admin' ? 'Manage checkouts, returns, and student requests.' : 'Request equipment for your event or activity.';
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       if (role === 'admin') {
         document.getElementById('dashboard').classList.add('active');
@@ -607,18 +551,12 @@
       }
     }
 
-    // ============================================================
-    // PANEL SWITCHING
-    // ============================================================
     function show(panelId) {
       const panel = document.getElementById(panelId);
       if (!panel) return;
       if (panel.classList.contains('admin-only') && currentRole !== 'admin') return;
       if (panel.classList.contains('user-only') && currentRole !== 'user') return;
-      if (currentRole === 'admin' && !currentUser && panelId === 'pendingRequests') {
-        openLogin();
-        return;
-      }
+      if (currentRole === 'admin' && !currentUser && panelId === 'pendingRequests') { openLogin(); return; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       panel.classList.add('active');
       document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
@@ -632,10 +570,7 @@
     function showMessage(msgId) {
       document.querySelectorAll('.msg').forEach(m => m.style.display = 'none');
       const msg = document.getElementById(msgId);
-      if (msg) {
-        msg.style.display = 'block';
-        setTimeout(() => { msg.style.display = 'none'; }, 5000);
-      }
+      if (msg) { msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 5000); }
     }
 
     function showMsgWithError(msgId, isError) {
@@ -645,9 +580,6 @@
       showMessage(msgId);
     }
 
-    // ============================================================
-    // TOGGLES
-    // ============================================================
     function toggleOtherDestination() {
       const sel = document.getElementById('coDestination');
       const wrap = document.getElementById('coDestinationOtherWrap');
@@ -665,25 +597,15 @@
     function toggleDamageSection() {
       const cond = document.getElementById('ciCondition').value;
       const section = document.getElementById('ciDamageSection');
-      if (cond === 'Damaged') {
-        section.classList.add('active');
-      } else {
-        section.classList.remove('active');
-        document.getElementById('ciDamageNotes').value = '';
-      }
+      if (cond === 'Damaged') section.classList.add('active');
+      else { section.classList.remove('active'); document.getElementById('ciDamageNotes').value = ''; }
     }
 
-    // ============================================================
-    // POPULATE DROPDOWNS
-    // ============================================================
     function populateCheckoutLocations() {
       const sel = document.getElementById('coLoc');
       sel.innerHTML = '<option value="">— Select source —</option>';
       CHECKOUT_LOCATIONS.forEach(loc => {
-        const opt = document.createElement('option');
-        opt.value = loc;
-        opt.textContent = loc;
-        sel.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; sel.appendChild(opt);
       });
     }
 
@@ -691,10 +613,7 @@
       const sel = document.getElementById('coDestination');
       sel.innerHTML = '<option value="">— Select destination —</option>';
       DESTINATION_LOCATIONS.forEach(loc => {
-        const opt = document.createElement('option');
-        opt.value = loc;
-        opt.textContent = loc;
-        sel.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; sel.appendChild(opt);
       });
     }
 
@@ -702,10 +621,7 @@
       const sel = document.getElementById('ciLoc');
       sel.innerHTML = '<option value="">— Select return location —</option>';
       CHECKOUT_LOCATIONS.forEach(loc => {
-        const opt = document.createElement('option');
-        opt.value = loc;
-        opt.textContent = loc;
-        sel.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; sel.appendChild(opt);
       });
     }
 
@@ -713,20 +629,12 @@
       const sel = document.getElementById('rqUseLocation');
       sel.innerHTML = '<option value="">— Select usage location —</option>';
       DESTINATION_LOCATIONS.forEach(loc => {
-        const opt = document.createElement('option');
-        opt.value = loc;
-        opt.textContent = loc;
-        sel.appendChild(opt);
+        const opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; sel.appendChild(opt);
       });
     }
 
-    // ============================================================
-    // LOAD DATA
-    // ============================================================
     async function loadInventory() {
-      const { data, error } = await sb
-        .from('inventory')
-        .select('equipment_id, name, location, status, quantity');
+      const { data, error } = await sb.from('inventory').select('equipment_id, name, location, status, quantity');
       if (error) { console.error('Failed to load inventory:', error); return; }
       EQUIPMENT = data.map(item => ({
         id: item.equipment_id,
@@ -739,41 +647,23 @@
 
     async function loadPendingRequests() {
       if (!currentUser) return;
-      const { data, error } = await sb
-        .from('requests')
-        .select('*')
-        .eq('status', 'Pending')
-        .order('created_at', { ascending: false });
+      const { data, error } = await sb.from('requests').select('*').eq('status', 'Pending').order('created_at', { ascending: false });
       if (error) { console.error('Failed to load pending requests:', error); return; }
       pendingRequests = data.map(r => ({
-        id: r.id,
-        name: r.name,
-        items: parseEquipmentString(r.equipment),
-        useLocation: r.location,
-        dateNeeded: r.date_needed,
-        returnDate: r.return_date,
-        notes: r.notes,
-        status: r.status
+        id: r.id, name: r.name, items: parseEquipmentString(r.equipment),
+        useLocation: r.location, dateNeeded: r.date_needed, returnDate: r.return_date,
+        notes: r.notes, status: r.status
       }));
       renderPendingRequests();
     }
 
     async function loadMyRequests() {
-      const { data, error } = await sb
-        .from('requests')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
+      const { data, error } = await sb.from('requests').select('*').order('created_at', { ascending: false }).limit(20);
       if (error) { console.error('Failed to load requests:', error); return; }
       myRequests = data.map(r => ({
-        id: r.id,
-        name: r.name,
-        items: parseEquipmentString(r.equipment),
-        useLocation: r.location,
-        dateNeeded: r.date_needed,
-        returnDate: r.return_date,
-        notes: r.notes,
-        status: r.status
+        id: r.id, name: r.name, items: parseEquipmentString(r.equipment),
+        useLocation: r.location, dateNeeded: r.date_needed, returnDate: r.return_date,
+        notes: r.notes, status: r.status
       }));
       renderMyRequests();
     }
@@ -788,13 +678,9 @@
       });
     }
 
-    // ============================================================
-    // REALTIME
-    // ============================================================
     function subscribeToRealtime() {
       if (realtimeChannel) sb.removeChannel(realtimeChannel);
-      realtimeChannel = sb
-        .channel('db-changes')
+      realtimeChannel = sb.channel('db-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, () => {
           if (currentUser) loadPendingRequests();
           loadMyRequests();
@@ -809,9 +695,6 @@
         .subscribe();
     }
 
-    // ============================================================
-    // CHECKOUT PICKER — BULK + TRACKED
-    // ============================================================
     function onSourceLocationChange() {
       selectedEquipment = [];
       document.getElementById('coPickerSearch').value = '';
@@ -823,112 +706,56 @@
       const locSelect = document.getElementById('coLoc');
       const picker = document.getElementById('coEquipPicker');
       const selectedLoc = locSelect.value;
-
-      if (!selectedLoc) {
-        picker.innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>';
-        return;
-      }
-
-      const available = EQUIPMENT.filter(
-        e => e.location === selectedLoc && e.status === 'Available'
-      );
-
-      if (available.length === 0) {
-        picker.innerHTML = '<div class="empty-note">No available equipment at this location.</div>';
-        return;
-      }
+      if (!selectedLoc) { picker.innerHTML = '<div class="empty-note">Select a checkout location above to see available equipment.</div>'; return; }
+      const available = EQUIPMENT.filter(e => e.location === selectedLoc && e.status === 'Available');
+      if (available.length === 0) { picker.innerHTML = '<div class="empty-note">No available equipment at this location.</div>'; return; }
 
       const bulkItems = available.filter(e => (e.quantity || 1) > 1);
       const trackedItems = available.filter(e => (e.quantity || 1) === 1);
-
       picker.innerHTML = '';
 
-      // Bulk Items
       if (bulkItems.length > 0) {
-        const bulkHeader = document.createElement('div');
-        bulkHeader.className = 'section-label';
-        bulkHeader.textContent = 'Bulk Items (enter quantity)';
-        picker.appendChild(bulkHeader);
-
+        const h = document.createElement('div'); h.className = 'section-label'; h.textContent = 'Bulk Items (enter quantity)'; picker.appendChild(h);
         bulkItems.forEach(item => {
           const selected = selectedEquipment.find(s => s.id === item.id);
           const alreadyAdded = selected ? selected.qty : 0;
           const totalAvail = item.quantity || 1;
           const remaining = totalAvail - alreadyAdded;
-
           let options = '<option value="0">0</option>';
-          for (let i = 1; i <= remaining; i++) {
-            options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
-          }
-
-          const row = document.createElement('div');
-          row.className = 'equip-row';
+          for (let i = 1; i <= remaining; i++) options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
+          const row = document.createElement('div'); row.className = 'equip-row';
           row.innerHTML = `
             <span class="row-name">${item.name}</span>
             <span class="row-stock">${totalAvail} available${alreadyAdded > 0 ? ` · ${alreadyAdded} added` : ''}</span>
-            <select class="row-id-select" id="bulk_${item.id}"
-                    onchange="setBulkQty('${item.id}', this.value)">
-              ${options}
-            </select>
+            <select class="row-id-select" id="bulk_${item.id}" onchange="setBulkQty('${item.id}', this.value)">${options}</select>
           `;
           picker.appendChild(row);
         });
       }
 
-      // Tracked Items
       if (trackedItems.length > 0) {
-        const trackedHeader = document.createElement('div');
-        trackedHeader.className = 'section-label';
-        trackedHeader.textContent = 'Tracked Items (select ID)';
-        picker.appendChild(trackedHeader);
-
+        const h = document.createElement('div'); h.className = 'section-label'; h.textContent = 'Tracked Items (select ID)'; picker.appendChild(h);
         const groups = {};
-        trackedItems.forEach(e => {
-          if (!groups[e.name]) groups[e.name] = [];
-          groups[e.name].push(e);
-        });
-
+        trackedItems.forEach(e => { if (!groups[e.name]) groups[e.name] = []; groups[e.name].push(e); });
         Object.keys(groups).sort().forEach(name => {
           const items = groups[name];
           const selectedIds = selectedEquipment.filter(s => s.name === name).map(s => s.id);
           const unselectedItems = items.filter(i => !selectedIds.includes(i.id));
-
           const row = document.createElement('div');
           row.className = 'equip-row' + (unselectedItems.length === 0 ? ' all-selected' : '');
           const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
-
-          const selectedCount = selectedIds.length;
-          const totalCount = items.length;
-          const countLabel = selectedCount > 0
-            ? `${selectedCount}/${totalCount} added`
-            : `${totalCount} available`;
-
+          const countLabel = selectedIds.length > 0 ? `${selectedIds.length}/${items.length} added` : `${items.length} available`;
           let dropdownHtml = '';
-          if (unselectedItems.length === 1) {
-            dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
-          } else if (unselectedItems.length > 1) {
-            const options = unselectedItems.map(i =>
-              `<option value="${i.id}">${i.id}</option>`
-            ).join('');
+          if (unselectedItems.length === 1) dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
+          else if (unselectedItems.length > 1) {
+            const options = unselectedItems.map(i => `<option value="${i.id}">${i.id}</option>`).join('');
             dropdownHtml = `<select class="row-id-select" id="sel_${safeId}">${options}</select>`;
-          } else {
-            dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
-          }
-
-          const addBtn = unselectedItems.length > 0
-            ? `<button class="row-add-btn" onclick="addGroupedEquipment('${name.replace(/'/g, "\\'")}')">Add</button>`
-            : '';
-
-          row.innerHTML = `
-            <span class="row-name">${name}</span>
-            <span class="row-stock">${countLabel}</span>
-            ${dropdownHtml}
-            ${addBtn}
-          `;
+          } else dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
+          const addBtn = unselectedItems.length > 0 ? `<button class="row-add-btn" onclick="addGroupedEquipment('${name.replace(/'/g, "\\'")}')">Add</button>` : '';
+          row.innerHTML = `<span class="row-name">${name}</span><span class="row-stock">${countLabel}</span>${dropdownHtml}${addBtn}`;
           picker.appendChild(row);
         });
       }
-
       filterCoPicker();
     }
 
@@ -937,12 +764,7 @@
       if (!item) return;
       const qty = parseInt(value, 10) || 0;
       selectedEquipment = selectedEquipment.filter(s => s.id !== equipId);
-      if (qty > 0) {
-        selectedEquipment.push({
-          id: item.id, name: item.name, location: item.location,
-          qty: qty, isBulk: true
-        });
-      }
+      if (qty > 0) selectedEquipment.push({ id: item.id, name: item.name, location: item.location, qty: qty, isBulk: true });
       renderSelectedEquipment();
       renderEquipmentPicker();
     }
@@ -951,31 +773,19 @@
       const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
       const sel = document.getElementById('sel_' + safeId);
       let equipId;
-      if (sel) {
-        equipId = sel.value;
-      } else {
+      if (sel) equipId = sel.value;
+      else {
         const source = document.getElementById('coLoc').value;
-        const items = EQUIPMENT.filter(
-          e => e.name === name && e.location === source && e.status === 'Available'
-        );
+        const items = EQUIPMENT.filter(e => e.name === name && e.location === source && e.status === 'Available');
         const selectedIds = selectedEquipment.filter(s => s.name === name).map(s => s.id);
         const unselected = items.find(i => !selectedIds.includes(i.id));
         if (!unselected) return;
         equipId = unselected.id;
       }
-
       const equip = EQUIPMENT.find(e => e.id === equipId);
       if (!equip) return;
-      if (selectedEquipment.some(s => s.id === equip.id)) {
-        alert('That ID is already selected.');
-        return;
-      }
-
-      selectedEquipment.push({
-        id: equip.id, name: equip.name, location: equip.location,
-        qty: 1, isBulk: false
-      });
-
+      if (selectedEquipment.some(s => s.id === equip.id)) { alert('That ID is already selected.'); return; }
+      selectedEquipment.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1, isBulk: false });
       renderSelectedEquipment();
       renderEquipmentPicker();
     }
@@ -995,53 +805,29 @@
     function renderSelectedEquipment() {
       const list = document.getElementById('coSelectedList');
       const count = document.getElementById('coSelectedCount');
-
       const totalItems = selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0);
       count.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
-
-      if (selectedEquipment.length === 0) {
-        list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
-        return;
-      }
-
+      if (selectedEquipment.length === 0) { list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>'; return; }
       const tracked = selectedEquipment.filter(e => !e.isBulk);
       const bulk = selectedEquipment.filter(e => e.isBulk);
-
-      const groupedTracked = {};
-      tracked.forEach(e => {
-        if (!groupedTracked[e.name]) groupedTracked[e.name] = [];
-        groupedTracked[e.name].push(e);
-      });
-
+      const grouped = {};
+      tracked.forEach(e => { if (!grouped[e.name]) grouped[e.name] = []; grouped[e.name].push(e); });
       list.innerHTML = '';
-
       bulk.forEach(e => {
-        const row = document.createElement('div');
-        row.className = 'selected-item';
+        const row = document.createElement('div'); row.className = 'selected-item';
         row.innerHTML = `
-          <div style="flex:1;">
-            <span class="name">${e.name}</span>
-            <span class="qty-badge">×${e.qty}</span>
-            <span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span>
-          </div>
+          <div style="flex:1;"><span class="name">${e.name}</span><span class="qty-badge">×${e.qty}</span><span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span></div>
           <button class="remove-btn" onclick="removeBulkItem('${e.id}')">Remove</button>
         `;
         list.appendChild(row);
       });
-
-      Object.keys(groupedTracked).sort().forEach(name => {
-        const items = groupedTracked[name];
-        const qty = items.length;
+      Object.keys(grouped).sort().forEach(name => {
+        const items = grouped[name];
         const ids = items.map(i => i.id).join(', ');
-
-        const row = document.createElement('div');
-        row.className = 'selected-item';
-        row.style.flexWrap = 'wrap';
-        row.style.gap = '8px';
+        const row = document.createElement('div'); row.className = 'selected-item'; row.style.flexWrap = 'wrap'; row.style.gap = '8px';
         row.innerHTML = `
           <div style="flex:1; min-width:200px;">
-            <span class="name">${name}</span>
-            <span class="qty-badge">×${qty}</span>
+            <span class="name">${name}</span><span class="qty-badge">×${items.length}</span>
             <div style="font-size:11px; color:#687386; margin-top:4px;">IDs: ${ids}</div>
           </div>
           <button class="remove-btn" onclick="removeEquipmentGroup('${name.replace(/'/g, "\\'")}')">Remove All</button>
@@ -1052,19 +838,13 @@
 
     function filterCoPicker() {
       const term = (document.getElementById('coPickerSearch')?.value || '').toLowerCase().trim();
-      const rows = document.querySelectorAll('#coEquipPicker .equip-row');
-      rows.forEach(row => {
+      document.querySelectorAll('#coEquipPicker .equip-row').forEach(row => {
         const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
-        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' +
-                       (row.querySelector('.row-stock')?.textContent || '');
-        const matches = !term || name.includes(term) || idText.toLowerCase().includes(term);
-        row.classList.toggle('hidden', !matches);
+        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' + (row.querySelector('.row-stock')?.textContent || '');
+        row.classList.toggle('hidden', !(!term || name.includes(term) || idText.toLowerCase().includes(term)));
       });
     }
 
-    // ============================================================
-    // CHECK-IN PICKER — BULK + TRACKED
-    // ============================================================
     function onReturnLocationChange() {
       selectedCheckinItems = [];
       otherCheckinItems = [];
@@ -1078,108 +858,55 @@
       const locSelect = document.getElementById('ciLoc');
       const picker = document.getElementById('ciEquipPicker');
       const selectedLoc = locSelect.value;
-
-      if (!selectedLoc) {
-        picker.innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>';
-        return;
-      }
-
+      if (!selectedLoc) { picker.innerHTML = '<div class="empty-note">Select a return location above to see equipment.</div>'; return; }
       const itemsAtLoc = EQUIPMENT.filter(e => e.location === selectedLoc);
-
-      if (itemsAtLoc.length === 0) {
-        picker.innerHTML = '<div class="empty-note">No equipment registered at this location.</div>';
-        return;
-      }
-
+      if (itemsAtLoc.length === 0) { picker.innerHTML = '<div class="empty-note">No equipment at this location.</div>'; return; }
       const bulkItems = itemsAtLoc.filter(e => (e.quantity || 1) > 1);
       const trackedItems = itemsAtLoc.filter(e => (e.quantity || 1) === 1);
-
       picker.innerHTML = '';
 
       if (bulkItems.length > 0) {
-        const bulkHeader = document.createElement('div');
-        bulkHeader.className = 'section-label';
-        bulkHeader.textContent = 'Bulk Items (enter quantity)';
-        picker.appendChild(bulkHeader);
-
+        const h = document.createElement('div'); h.className = 'section-label'; h.textContent = 'Bulk Items (enter quantity)'; picker.appendChild(h);
         bulkItems.forEach(item => {
           const selected = selectedCheckinItems.find(s => s.id === item.id);
           const alreadyAdded = selected ? selected.qty : 0;
           const totalAvail = item.quantity || 1;
           const remaining = totalAvail - alreadyAdded;
-
           let options = '<option value="0">0</option>';
-          for (let i = 1; i <= remaining; i++) {
-            options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
-          }
-
-          const row = document.createElement('div');
-          row.className = 'equip-row';
+          for (let i = 1; i <= remaining; i++) options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
+          const row = document.createElement('div'); row.className = 'equip-row';
           row.innerHTML = `
             <span class="row-name">${item.name}</span>
             <span class="row-stock">${totalAvail} total${alreadyAdded > 0 ? ` · ${alreadyAdded} added` : ''}</span>
-            <select class="row-id-select" id="cibulk_${item.id}"
-                    onchange="setCheckinBulkQty('${item.id}', this.value)">
-              ${options}
-            </select>
+            <select class="row-id-select" id="cibulk_${item.id}" onchange="setCheckinBulkQty('${item.id}', this.value)">${options}</select>
           `;
           picker.appendChild(row);
         });
       }
 
       if (trackedItems.length > 0) {
-        const trackedHeader = document.createElement('div');
-        trackedHeader.className = 'section-label';
-        trackedHeader.textContent = 'Tracked Items (select ID)';
-        picker.appendChild(trackedHeader);
-
+        const h = document.createElement('div'); h.className = 'section-label'; h.textContent = 'Tracked Items (select ID)'; picker.appendChild(h);
         const groups = {};
-        trackedItems.forEach(e => {
-          if (!groups[e.name]) groups[e.name] = [];
-          groups[e.name].push(e);
-        });
-
+        trackedItems.forEach(e => { if (!groups[e.name]) groups[e.name] = []; groups[e.name].push(e); });
         Object.keys(groups).sort().forEach(name => {
           const items = groups[name];
           const selectedIds = selectedCheckinItems.filter(s => s.name === name).map(s => s.id);
           const unselectedItems = items.filter(i => !selectedIds.includes(i.id));
-
           const row = document.createElement('div');
           row.className = 'equip-row' + (unselectedItems.length === 0 ? ' all-selected' : '');
           const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
-
-          const selectedCount = selectedIds.length;
-          const totalCount = items.length;
-          const countLabel = selectedCount > 0
-            ? `${selectedCount}/${totalCount} added`
-            : `${totalCount} total`;
-
+          const countLabel = selectedIds.length > 0 ? `${selectedIds.length}/${items.length} added` : `${items.length} total`;
           let dropdownHtml = '';
-          if (unselectedItems.length === 1) {
-            dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
-          } else if (unselectedItems.length > 1) {
-            const options = unselectedItems.map(i =>
-              `<option value="${i.id}">${i.id}</option>`
-            ).join('');
+          if (unselectedItems.length === 1) dropdownHtml = `<span class="row-stock" style="background:#f1f4fa;color:#1e293b;">${unselectedItems[0].id}</span>`;
+          else if (unselectedItems.length > 1) {
+            const options = unselectedItems.map(i => `<option value="${i.id}">${i.id}</option>`).join('');
             dropdownHtml = `<select class="row-id-select" id="cisel_${safeId}">${options}</select>`;
-          } else {
-            dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
-          }
-
-          const addBtn = unselectedItems.length > 0
-            ? `<button class="row-add-btn" onclick="addGroupedCheckin('${name.replace(/'/g, "\\'")}')">Add</button>`
-            : '';
-
-          row.innerHTML = `
-            <span class="row-name">${name}</span>
-            <span class="row-stock">${countLabel}</span>
-            ${dropdownHtml}
-            ${addBtn}
-          `;
+          } else dropdownHtml = `<span class="row-stock" style="background:#dcfce7;color:#15803d;">✓ All added</span>`;
+          const addBtn = unselectedItems.length > 0 ? `<button class="row-add-btn" onclick="addGroupedCheckin('${name.replace(/'/g, "\\'")}')">Add</button>` : '';
+          row.innerHTML = `<span class="row-name">${name}</span><span class="row-stock">${countLabel}</span>${dropdownHtml}${addBtn}`;
           picker.appendChild(row);
         });
       }
-
       filterCiPicker();
     }
 
@@ -1188,12 +915,7 @@
       if (!item) return;
       const qty = parseInt(value, 10) || 0;
       selectedCheckinItems = selectedCheckinItems.filter(s => s.id !== equipId);
-      if (qty > 0) {
-        selectedCheckinItems.push({
-          id: item.id, name: item.name, location: item.location,
-          qty: qty, isBulk: true
-        });
-      }
+      if (qty > 0) selectedCheckinItems.push({ id: item.id, name: item.name, location: item.location, qty: qty, isBulk: true });
       renderCheckinSelected();
       renderCheckinPicker();
     }
@@ -1202,9 +924,8 @@
       const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
       const sel = document.getElementById('cisel_' + safeId);
       let equipId;
-      if (sel) {
-        equipId = sel.value;
-      } else {
+      if (sel) equipId = sel.value;
+      else {
         const loc = document.getElementById('ciLoc').value;
         const items = EQUIPMENT.filter(e => e.name === name && e.location === loc);
         const selectedIds = selectedCheckinItems.filter(s => s.name === name).map(s => s.id);
@@ -1212,19 +933,10 @@
         if (!unselected) return;
         equipId = unselected.id;
       }
-
       const equip = EQUIPMENT.find(e => e.id === equipId);
       if (!equip) return;
-      if (selectedCheckinItems.some(s => s.id === equip.id)) {
-        alert('That ID is already selected.');
-        return;
-      }
-
-      selectedCheckinItems.push({
-        id: equip.id, name: equip.name, location: equip.location,
-        qty: 1, isBulk: false
-      });
-
+      if (selectedCheckinItems.some(s => s.id === equip.id)) { alert('That ID is already selected.'); return; }
+      selectedCheckinItems.push({ id: equip.id, name: equip.name, location: equip.location, qty: 1, isBulk: false });
       renderCheckinSelected();
       renderCheckinPicker();
     }
@@ -1244,70 +956,39 @@
     function renderCheckinSelected() {
       const list = document.getElementById('ciSelectedList');
       const count = document.getElementById('ciSelectedCount');
-
-      const total = selectedCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0) +
-                    otherCheckinItems.reduce((sum, e) => sum + e.qty, 0);
+      const total = selectedCheckinItems.reduce((sum, e) => sum + (e.qty || 1), 0) + otherCheckinItems.reduce((sum, e) => sum + e.qty, 0);
       count.textContent = total + (total === 1 ? ' item' : ' items');
-
-      if (selectedCheckinItems.length === 0 && otherCheckinItems.length === 0) {
-        list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>';
-        return;
-      }
-
+      if (selectedCheckinItems.length === 0 && otherCheckinItems.length === 0) { list.innerHTML = '<div class="selected-empty">No equipment selected yet.</div>'; return; }
       const tracked = selectedCheckinItems.filter(e => !e.isBulk);
       const bulk = selectedCheckinItems.filter(e => e.isBulk);
-
-      const groupedTracked = {};
-      tracked.forEach(e => {
-        if (!groupedTracked[e.name]) groupedTracked[e.name] = [];
-        groupedTracked[e.name].push(e);
-      });
-
+      const grouped = {};
+      tracked.forEach(e => { if (!grouped[e.name]) grouped[e.name] = []; grouped[e.name].push(e); });
       list.innerHTML = '';
-
       bulk.forEach(e => {
-        const row = document.createElement('div');
-        row.className = 'selected-item';
+        const row = document.createElement('div'); row.className = 'selected-item';
         row.innerHTML = `
-          <div style="flex:1;">
-            <span class="name">${e.name}</span>
-            <span class="qty-badge">×${e.qty}</span>
-            <span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span>
-          </div>
+          <div style="flex:1;"><span class="name">${e.name}</span><span class="qty-badge">×${e.qty}</span><span style="font-size:11px;color:#687386;margin-left:6px;">bulk</span></div>
           <button class="remove-btn" onclick="removeCheckinBulk('${e.id}')">Remove</button>
         `;
         list.appendChild(row);
       });
-
-      Object.keys(groupedTracked).sort().forEach(name => {
-        const items = groupedTracked[name];
-        const qty = items.length;
+      Object.keys(grouped).sort().forEach(name => {
+        const items = grouped[name];
         const ids = items.map(i => i.id).join(', ');
-
-        const row = document.createElement('div');
-        row.className = 'selected-item';
-        row.style.flexWrap = 'wrap';
-        row.style.gap = '8px';
+        const row = document.createElement('div'); row.className = 'selected-item'; row.style.flexWrap = 'wrap'; row.style.gap = '8px';
         row.innerHTML = `
           <div style="flex:1; min-width:200px;">
-            <span class="name">${name}</span>
-            <span class="qty-badge">×${qty}</span>
+            <span class="name">${name}</span><span class="qty-badge">×${items.length}</span>
             <div style="font-size:11px; color:#687386; margin-top:4px;">IDs: ${ids}</div>
           </div>
           <button class="remove-btn" onclick="removeCheckinGroup('${name.replace(/'/g, "\\'")}')">Remove All</button>
         `;
         list.appendChild(row);
       });
-
       otherCheckinItems.forEach((item, i) => {
-        const row = document.createElement('div');
-        row.className = 'selected-item';
+        const row = document.createElement('div'); row.className = 'selected-item';
         row.innerHTML = `
-          <div style="flex:1;">
-            <span class="name">${item.name}</span>
-            <span class="qty-badge">×${item.qty}</span>
-            <span style="font-size:11px;color:#b85c00;margin-left:6px;">[other]</span>
-          </div>
+          <div style="flex:1;"><span class="name">${item.name}</span><span class="qty-badge">×${item.qty}</span><span style="font-size:11px;color:#b85c00;margin-left:6px;">[other]</span></div>
           <button class="remove-btn" onclick="removeOtherCheckinItem(${i})">Remove</button>
         `;
         list.appendChild(row);
@@ -1316,19 +997,13 @@
 
     function filterCiPicker() {
       const term = (document.getElementById('ciPickerSearch')?.value || '').toLowerCase().trim();
-      const rows = document.querySelectorAll('#ciEquipPicker .equip-row');
-      rows.forEach(row => {
+      document.querySelectorAll('#ciEquipPicker .equip-row').forEach(row => {
         const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
-        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' +
-                       (row.querySelector('.row-stock')?.textContent || '');
-        const matches = !term || name.includes(term) || idText.toLowerCase().includes(term);
-        row.classList.toggle('hidden', !matches);
+        const idText = (row.querySelector('.row-id-select')?.textContent || '') + ' ' + (row.querySelector('.row-stock')?.textContent || '');
+        row.classList.toggle('hidden', !(!term || name.includes(term) || idText.toLowerCase().includes(term)));
       });
     }
 
-    // ============================================================
-    // OTHER CHECK-IN ITEMS
-    // ============================================================
     function addOtherCheckinItem() {
       const nameInput = document.getElementById('ciOtherName');
       const qtyInput = document.getElementById('ciOtherQty');
@@ -1336,8 +1011,7 @@
       const qty = parseInt(qtyInput.value, 10) || 1;
       if (!name) { alert('Please enter a name or description.'); return; }
       otherCheckinItems.push({ name, qty });
-      nameInput.value = '';
-      qtyInput.value = '1';
+      nameInput.value = ''; qtyInput.value = '1';
       renderOtherTags();
       renderCheckinSelected();
     }
@@ -1360,99 +1034,58 @@
       });
     }
 
-    // ============================================================
-    // PRE-REQUEST PICKER — TOTAL + AVAILABLE
-    // ============================================================
     function renderRequestPicker() {
       const picker = document.getElementById('rqEquipPicker');
       if (!picker) return;
-
       const groups = {};
       EQUIPMENT.forEach(e => {
-        if (!groups[e.name]) {
-          groups[e.name] = { total: 0, available: 0 };
-        }
+        if (!groups[e.name]) groups[e.name] = { total: 0, available: 0 };
         const q = e.quantity || 1;
         groups[e.name].total += q;
-        if (e.status === 'Available') {
-          groups[e.name].available += q;
-        }
+        if (e.status === 'Available') groups[e.name].available += q;
       });
-
       const names = Object.keys(groups).sort();
-      if (names.length === 0) {
-        picker.innerHTML = '<div class="empty-note">No equipment in inventory.</div>';
-        return;
-      }
-
+      if (names.length === 0) { picker.innerHTML = '<div class="empty-note">No equipment in inventory.</div>'; return; }
       picker.innerHTML = '';
       names.forEach(name => {
         const { total, available } = groups[name];
         const inCart = requestCart.find(c => c.name === name);
         const alreadyAdded = inCart ? inCart.qty : 0;
         const remaining = Math.max(0, available - alreadyAdded);
-
         let options = '<option value="0">0</option>';
-        for (let i = 1; i <= remaining; i++) {
-          options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
-        }
-
+        for (let i = 1; i <= remaining; i++) options += `<option value="${i}"${i === alreadyAdded ? ' selected' : ''}>${i}</option>`;
         const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
-        const row = document.createElement('div');
-        row.className = 'equip-row';
-
+        const row = document.createElement('div'); row.className = 'equip-row';
         let label = `Total: <strong>${total}</strong> · Available: <strong>${available}</strong>`;
-        if (alreadyAdded > 0) {
-          label += ` · In Cart: <strong style="color:#1769e0;">${alreadyAdded}</strong>`;
-        }
-        if (available === 0) {
-          label = `<span style="color:#b91c1c;">Total: ${total} · All checked out</span>`;
-        }
-
+        if (alreadyAdded > 0) label += ` · In Cart: <strong style="color:#1769e0;">${alreadyAdded}</strong>`;
+        if (available === 0) label = `<span style="color:#b91c1c;">Total: ${total} · All checked out</span>`;
         const disabled = available === 0 ? ' disabled' : '';
-
         row.innerHTML = `
           <span class="row-name">${name}</span>
           <span class="row-stock">${label}</span>
-          <select class="row-id-select" id="rqsel_${safeId}"${disabled}
-                  onchange="setRequestQty('${name.replace(/'/g, "\\'")}', this.value)">
-            ${options}
-          </select>
+          <select class="row-id-select" id="rqsel_${safeId}"${disabled} onchange="setRequestQty('${name.replace(/'/g, "\\'")}', this.value)">${options}</select>
         `;
         picker.appendChild(row);
       });
-
       filterRqPicker();
     }
 
     function setRequestQty(name, value) {
       const qty = parseInt(value, 10) || 0;
       requestCart = requestCart.filter(c => c.name !== name);
-      if (qty > 0) {
-        requestCart.push({ name: name, qty: qty });
-      }
+      if (qty > 0) requestCart.push({ name: name, qty: qty });
       renderRequestCart();
       renderRequestPicker();
     }
 
     function renderRequestCart() {
       const cart = document.getElementById('rqCart');
-      if (requestCart.length === 0) {
-        cart.innerHTML = '<div class="req-cart-empty">No items added yet.</div>';
-        return;
-      }
-
+      if (requestCart.length === 0) { cart.innerHTML = '<div class="req-cart-empty">No items added yet.</div>'; return; }
       cart.innerHTML = '';
       requestCart.forEach(item => {
-        const total = EQUIPMENT
-          .filter(e => e.name === item.name)
-          .reduce((sum, e) => sum + (e.quantity || 1), 0);
-        const available = EQUIPMENT
-          .filter(e => e.name === item.name && e.status === 'Available')
-          .reduce((sum, e) => sum + (e.quantity || 1), 0);
-
-        const row = document.createElement('div');
-        row.className = 'req-item-row';
+        const total = EQUIPMENT.filter(e => e.name === item.name).reduce((sum, e) => sum + (e.quantity || 1), 0);
+        const available = EQUIPMENT.filter(e => e.name === item.name && e.status === 'Available').reduce((sum, e) => sum + (e.quantity || 1), 0);
+        const row = document.createElement('div'); row.className = 'req-item-row';
         row.innerHTML = `
           <div class="req-name">${item.name}</div>
           <span style="font-size:11px;color:#687386;">${available}/${total} available</span>
@@ -1465,38 +1098,25 @@
 
     function filterRqPicker() {
       const term = (document.getElementById('rqPickerSearch')?.value || '').toLowerCase().trim();
-      const rows = document.querySelectorAll('#rqEquipPicker .equip-row');
-      rows.forEach(row => {
+      document.querySelectorAll('#rqEquipPicker .equip-row').forEach(row => {
         const name = (row.querySelector('.row-name')?.textContent || '').toLowerCase();
         row.classList.toggle('hidden', !(!term || name.includes(term)));
       });
     }
 
-    // ============================================================
-    // DASHBOARD
-    // ============================================================
     function renderDashboard() {
       const totalItems = EQUIPMENT.reduce((sum, e) => sum + (e.quantity || 1), 0);
-      const availableItems = EQUIPMENT
-        .filter(e => e.status === 'Available')
-        .reduce((sum, e) => sum + (e.quantity || 1), 0);
-      const outItems = EQUIPMENT
-        .filter(e => e.status === 'Checked Out')
-        .reduce((sum, e) => sum + (e.quantity || 1), 0);
-      const locationCount = CHECKOUT_LOCATIONS.length;
+      const availableItems = EQUIPMENT.filter(e => e.status === 'Available').reduce((sum, e) => sum + (e.quantity || 1), 0);
+      const outItems = EQUIPMENT.filter(e => e.status === 'Checked Out').reduce((sum, e) => sum + (e.quantity || 1), 0);
       document.getElementById('total').textContent = totalItems;
       document.getElementById('available').textContent = availableItems;
       document.getElementById('out').textContent = outItems;
-      document.getElementById('locations').textContent = locationCount;
-
+      document.getElementById('locations').textContent = CHECKOUT_LOCATIONS.length;
       const locFilter = document.getElementById('invLocationFilter');
       if (locFilter && locFilter.options.length <= 1) {
         const uniqueLocs = [...new Set(EQUIPMENT.map(e => e.location))].sort();
         uniqueLocs.forEach(loc => {
-          const opt = document.createElement('option');
-          opt.value = loc;
-          opt.textContent = loc;
-          locFilter.appendChild(opt);
+          const opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; locFilter.appendChild(opt);
         });
       }
       renderInventoryTable();
@@ -1507,14 +1127,10 @@
       const locationFilter = document.getElementById('invLocationFilter')?.value || '';
       const sortKey = document.getElementById('invSort')?.value || 'id';
       const search = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
-
       let items = [...EQUIPMENT];
       if (statusFilter) items = items.filter(e => e.status === statusFilter);
       if (locationFilter) items = items.filter(e => e.location === locationFilter);
-      if (search) items = items.filter(e =>
-        e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search)
-      );
-
+      if (search) items = items.filter(e => e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search));
       items.sort((a, b) => {
         switch (sortKey) {
           case 'id': return a.id.localeCompare(b.id);
@@ -1525,16 +1141,11 @@
           default: return 0;
         }
       });
-
       const countEl = document.getElementById('invCount');
       if (countEl) countEl.textContent = items.length + (items.length === 1 ? ' row' : ' rows');
-
       const tbody = document.getElementById('inv');
       tbody.innerHTML = '';
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match your filters.</td></tr>`;
-        return;
-      }
+      if (items.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match.</td></tr>`; return; }
       items.forEach(e => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1548,16 +1159,13 @@
       });
     }
 
-    // ============================================================
-    // PENDING REQUESTS
-    // ============================================================
     function renderPendingRequests() {
       const tbody = document.getElementById('pendingTable');
       if (pendingRequests.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No pending requests at this time.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No pending requests.</td></tr>`;
       } else {
         tbody.innerHTML = '';
-        pendingRequests.forEach((req) => {
+        pendingRequests.forEach(req => {
           const itemsSummary = req.items.map(it => `${it.name} (x${it.qty})`).join(', ');
           const tr = document.createElement('tr');
           tr.innerHTML = `
@@ -1582,13 +1190,8 @@
     function updateBellBadge() {
       const badge = document.getElementById('bellBadge');
       const count = pendingRequests.length;
-      if (count > 0) {
-        badge.textContent = count;
-        badge.classList.add('visible');
-      } else {
-        badge.textContent = '0';
-        badge.classList.remove('visible');
-      }
+      if (count > 0) { badge.textContent = count; badge.classList.add('visible'); }
+      else { badge.textContent = '0'; badge.classList.remove('visible'); }
     }
 
     function goToPending() {
@@ -1608,23 +1211,13 @@
       await loadPendingRequests();
     }
 
-    // ============================================================
-    // MY REQUESTS
-    // ============================================================
     function renderMyRequests() {
       const container = document.getElementById('myRequestsList');
-      if (myRequests.length === 0) {
-        container.innerHTML = '<div class="req-cart-empty">You haven\'t submitted any pre-requests yet.</div>';
-        return;
-      }
+      if (myRequests.length === 0) { container.innerHTML = '<div class="req-cart-empty">You haven\'t submitted any pre-requests yet.</div>'; return; }
       container.innerHTML = '';
       myRequests.forEach(req => {
         const card = document.createElement('div');
-        card.style.border = '1px solid #e2e8f2';
-        card.style.borderRadius = '12px';
-        card.style.padding = '16px';
-        card.style.marginBottom = '12px';
-        card.style.background = '#f9fbfe';
+        card.style.cssText = 'border:1px solid #e2e8f2;border-radius:12px;padding:16px;margin-bottom:12px;background:#f9fbfe;';
         const itemsHtml = req.items.map(it => `<li style="font-size:13px; padding:2px 0;">${it.name} — Qty: ${it.qty}</li>`).join('');
         const badgeClass = req.status === 'Approved' ? 'approved' : req.status === 'Denied' ? 'denied' : 'pending';
         card.innerHTML = `
@@ -1644,89 +1237,57 @@
       });
     }
 
-    // ============================================================
-    // SUBMIT: CHECKOUT
-    // ============================================================
     async function submitCheckout() {
       const source = document.getElementById('coLoc').value;
       const destSelect = document.getElementById('coDestination').value;
       const destOther = document.getElementById('coDestinationOther').value.trim();
       const name = document.getElementById('coName').value.trim();
       const checkoutDate = document.getElementById('coDate').value;
-
       let destination = destSelect;
       if (destSelect === 'Other') {
-        if (!destOther) { alert('Please type a custom destination location.'); return; }
+        if (!destOther) { alert('Please type a custom destination.'); return; }
         destination = destOther;
       }
-      if (!source) { alert('Please select a checkout (source) location.'); return; }
+      if (!source) { alert('Please select a checkout location.'); return; }
       if (selectedEquipment.length === 0) { alert('Please select at least one piece of equipment.'); return; }
-      if (!destination) { alert('Please select or enter a destination location.'); return; }
+      if (!destination) { alert('Please select a destination.'); return; }
       if (!name) { alert('Please enter your name.'); return; }
       if (!checkoutDate) { alert('Please select a checkout date.'); return; }
 
-      const equipmentStr = selectedEquipment.map(e =>
-        e.isBulk
-          ? `${e.name} (x${e.qty}) [bulk]`
-          : `${e.name} (${e.id}) (x1)`
-      ).join('; ');
-
+      const equipmentStr = selectedEquipment.map(e => e.isBulk ? `${e.name} (x${e.qty}) [bulk]` : `${e.name} (${e.id}) (x1)`).join('; ');
       const totalQty = selectedEquipment.reduce((sum, e) => sum + (e.qty || 1), 0);
 
       setButtonLoading('coSubmitBtn', true);
       const { error } = await sb.from('transactions').insert({
-        type: 'checkout',
-        name: name,
-        source: source,
-        destination: destination,
-        equipment: equipmentStr,
-        quantity: totalQty,
+        type: 'checkout', name, source, destination,
+        equipment: equipmentStr, quantity: totalQty,
         notes: document.getElementById('coNotes').value,
         checkout_date: checkoutDate
       });
 
-      // Mark tracked items as Checked Out
-const trackedIds = selectedEquipment.filter(e => !e.isBulk).map(e => e.id);
-if (trackedIds.length > 0) {
-  const { data: updateData, error: updateError } = await sb
-    .from('inventory')
-    .update({ status: 'Checked Out' })
-    .in('equipment_id', trackedIds)
-    .select();  // returns the updated rows so we can see if it worked
-
-  if (updateError) {
-    console.error('❌ Failed to update inventory status:', updateError);
-    alert('Checkout was logged, but marking items as Checked Out failed: ' + updateError.message);
-  } else {
-    console.log('✅ Inventory status updated for:', updateData);
-  }
-}
-      // Mark tracked items back to Available
-const trackedIds = selectedCheckinItems.filter(e => !e.isBulk).map(e => e.id);
-if (trackedIds.length > 0) {
-  const { data: updateData, error: updateError } = await sb
-    .from('inventory')
-    .update({ status: 'Available' })
-    .in('equipment_id', trackedIds)
-    .select();
-
-  if (updateError) {
-    console.error('❌ Failed to update inventory status:', updateError);
-    alert('Check-in was logged, but resetting items to Available failed: ' + updateError.message);
-  } else {
-    console.log('✅ Inventory status updated for:', updateData);
-  }
-}
+      // ---- AUTO-STATUS UPDATE WITH LOGGING ----
+      const trackedIds = selectedEquipment.filter(e => !e.isBulk).map(e => e.id);
+      if (trackedIds.length > 0) {
+        const { data: updateData, error: updateError } = await sb
+          .from('inventory')
+          .update({ status: 'Checked Out' })
+          .in('equipment_id', trackedIds)
+          .select();
+        if (updateError) {
+          console.error('❌ Failed to update inventory status:', updateError);
+          alert('Checkout logged, but marking items as Checked Out failed: ' + updateError.message);
+        } else {
+          console.log('✅ Inventory status updated:', updateData);
+        }
+      }
 
       setButtonLoading('coSubmitBtn', false);
-
       if (error) {
         showMsgWithError('coMsg', true);
         document.getElementById('coMsg').textContent = 'Submission failed: ' + error.message;
         return;
       }
       showMsgWithError('coMsg', false);
-
       selectedEquipment = [];
       renderSelectedEquipment();
       renderEquipmentPicker();
@@ -1744,9 +1305,6 @@ if (trackedIds.length > 0) {
       renderDashboard();
     }
 
-    // ============================================================
-    // SUBMIT: CHECK-IN
-    // ============================================================
     async function submitCheckin() {
       const loc = document.getElementById('ciLoc').value;
       const returner = document.getElementById('ciReturner').value.trim();
@@ -1754,53 +1312,50 @@ if (trackedIds.length > 0) {
       const damageNotes = document.getElementById('ciDamageNotes').value.trim();
       const returnDate = document.getElementById('ciReturnDate').value;
       const totalSelected = selectedCheckinItems.length + otherCheckinItems.length;
-
       if (!loc) { alert('Please select a return location.'); return; }
-      if (totalSelected === 0) { alert('Please select or add at least one piece of equipment to return.'); return; }
-      if (!returner) { alert('Please enter the name of the person returning the equipment.'); return; }
-      if (condition === 'Damaged' && !damageNotes) { alert('Please describe the damage before submitting.'); return; }
+      if (totalSelected === 0) { alert('Please select at least one item.'); return; }
+      if (!returner) { alert('Please enter the name of the returner.'); return; }
+      if (condition === 'Damaged' && !damageNotes) { alert('Please describe the damage.'); return; }
       if (!returnDate) { alert('Please select a return date.'); return; }
 
       const allItems = [
-        ...selectedCheckinItems.map(e =>
-          e.isBulk
-            ? `${e.name} (x${e.qty}) [bulk]`
-            : `${e.name} (${e.id}) (x1)`
-        ),
+        ...selectedCheckinItems.map(e => e.isBulk ? `${e.name} (x${e.qty}) [bulk]` : `${e.name} (${e.id}) (x1)`),
         ...otherCheckinItems.map(e => `${e.name} (x${e.qty}) [other]`)
       ];
-
-      const totalQty = selectedCheckinItems.reduce((s, e) => s + (e.qty || 1), 0) +
-                       otherCheckinItems.reduce((s, e) => s + e.qty, 0);
+      const totalQty = selectedCheckinItems.reduce((s, e) => s + (e.qty || 1), 0) + otherCheckinItems.reduce((s, e) => s + e.qty, 0);
 
       setButtonLoading('ciSubmitBtn', true);
       const { error } = await sb.from('transactions').insert({
-        type: 'checkin',
-        name: returner,
-        source: loc,
-        equipment: allItems.join('; '),
-        quantity: totalQty,
-        condition: condition,
-        damage_notes: damageNotes,
+        type: 'checkin', name: returner, source: loc,
+        equipment: allItems.join('; '), quantity: totalQty,
+        condition, damage_notes: damageNotes,
         notes: document.getElementById('ciNotes').value,
         return_date: returnDate
       });
 
-      // Mark tracked items back to Available
+      // ---- AUTO-STATUS UPDATE WITH LOGGING ----
       const trackedIds = selectedCheckinItems.filter(e => !e.isBulk).map(e => e.id);
       if (trackedIds.length > 0) {
-        await sb.from('inventory').update({ status: 'Available' }).in('equipment_id', trackedIds);
+        const { data: updateData, error: updateError } = await sb
+          .from('inventory')
+          .update({ status: 'Available' })
+          .in('equipment_id', trackedIds)
+          .select();
+        if (updateError) {
+          console.error('❌ Failed to update inventory status:', updateError);
+          alert('Check-in logged, but resetting items to Available failed: ' + updateError.message);
+        } else {
+          console.log('✅ Inventory status updated:', updateData);
+        }
       }
 
       setButtonLoading('ciSubmitBtn', false);
-
       if (error) {
         showMsgWithError('ciMsg', true);
         document.getElementById('ciMsg').textContent = 'Submission failed: ' + error.message;
         return;
       }
       showMsgWithError('ciMsg', false);
-
       selectedCheckinItems = [];
       otherCheckinItems = [];
       renderCheckinSelected();
@@ -1819,9 +1374,6 @@ if (trackedIds.length > 0) {
       renderDashboard();
     }
 
-    // ============================================================
-    // SUBMIT: PRE-REQUEST
-    // ============================================================
     async function submitRequest() {
       const name = document.getElementById('rqName').value.trim();
       const useLocSelect = document.getElementById('rqUseLocation').value;
@@ -1834,31 +1386,28 @@ if (trackedIds.length > 0) {
       const dateNeeded = document.getElementById('rqDateNeeded').value;
       const returnDate = document.getElementById('rqReturn').value;
       const notes = document.getElementById('rqNotes').value.trim();
-
-      if (!name) { alert('Please enter your name before submitting.'); return; }
-      if (requestCart.length === 0) { alert('Please add at least one equipment item.'); return; }
+      if (!name) { alert('Please enter your name.'); return; }
+      if (requestCart.length === 0) { alert('Please add at least one item.'); return; }
       if (!useLocation) { alert('Please select or enter the usage location.'); return; }
 
       setButtonLoading('rqSubmitBtn', true);
       const { error } = await sb.from('requests').insert({
-        name: name,
+        name,
         equipment: requestCart.map(it => `${it.name} (x${it.qty})`).join('; '),
         quantity: requestCart.reduce((sum, it) => sum + it.qty, 0),
         location: useLocation,
         date_needed: dateNeeded || null,
         return_date: returnDate || null,
-        notes: notes,
+        notes,
         status: 'Pending'
       });
       setButtonLoading('rqSubmitBtn', false);
-
       if (error) {
         showMsgWithError('rqMsg', true);
         document.getElementById('rqMsg').textContent = 'Submission failed: ' + error.message;
         return;
       }
       showMsgWithError('rqMsg', false);
-
       requestCart = [];
       renderRequestCart();
       renderRequestPicker();
@@ -1873,9 +1422,6 @@ if (trackedIds.length > 0) {
       await loadMyRequests();
     }
 
-    // ============================================================
-    // UTILITIES
-    // ============================================================
     function setButtonLoading(btnId, loading) {
       const btn = document.getElementById(btnId);
       if (!btn) return;
@@ -1901,42 +1447,29 @@ if (trackedIds.length > 0) {
       if (ciDate) ciDate.value = todayStr;
     }
 
-    // ============================================================
-    // INITIALIZATION
-    // ============================================================
     window.addEventListener('DOMContentLoaded', async function() {
       populateCheckoutLocations();
       populateDestinationLocations();
       populateReturnLocations();
       populateUsageLocations();
-
       await loadInventory();
       renderRequestPicker();
       renderRequestCart();
       renderDashboard();
       setDatesToToday();
-
       document.getElementById('coDestinationOtherWrap').style.display = 'none';
       document.getElementById('rqUseLocationOtherWrap').style.display = 'none';
       document.getElementById('ciDamageSection').classList.remove('active');
-
       await checkAuth();
       await loadMyRequests();
       if (currentUser) await loadPendingRequests();
-
       subscribeToRealtime();
-
       sb.auth.onAuthStateChange((event, session) => {
         currentUser = session ? session.user : null;
         updateAuthUI();
-        if (currentUser) {
-          loadPendingRequests();
-        } else {
-          pendingRequests = [];
-          renderPendingRequests();
-        }
+        if (currentUser) loadPendingRequests();
+        else { pendingRequests = []; renderPendingRequests(); }
       });
-
       setRole('user');
     });
   </script>
