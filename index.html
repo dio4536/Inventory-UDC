@@ -433,29 +433,8 @@
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const CHECKOUT_LOCATIONS = ["B-Level storage","C-Level storage","Ballroom storage","Ballroom AV closet"];
-    const DESTINATION_LOCATIONS = [
-  "Ballroom A",
-  "Ballroom B",
-  "Pre Function Ballroom",
-  "Tower Conference 101",
-  "Executive Conference 110",
-  "Study Room 103",
-  "Study Room – 132",
-  "Room A01",
-  "Heritage Hall",
-  "Sudent Lounge",
-  "Student Center GYM",
-  "Student Center- Atrium",
-  "Student Center- A-Level Plaza",
-  "Window Lounge",
-  "Denard Plaza",
-  "Greek Row",
-  "Theater of Arts",
-  "Ample Theater",
-  "Theater – Backstage",
-  "Black Box",
-  "Other"
-];
+    const DESTINATION_LOCATIONS = ["Ballroom A","Ballroom B","Heritage Hall","B-Level storage","C-Level storage","Ballroom storage","Ballroom AV closet","Ballroom","Student Center – Front Desk","Student Center – Game Room","Student Center – Conference A","Student Center – Conference B","Student Center – Outdoor Patio","Library – Media Lab","Library – Study Pod 1","Library – Study Pod 2","Recreation Center – Main","Recreation Center – Court 1","Recreation Center – Court 2","Dining Hall – Events","Theater – Backstage","Music Room – 101","Music Room – 102","Other"];
+
     let EQUIPMENT = [];
     let selectedEquipment = [];
     let selectedCheckinItems = [];
