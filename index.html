@@ -679,15 +679,30 @@ function getSessionId() {
     }
 
     async function loadMyRequests() {
-      const { data, error } = await sb.from('requests').select('*').order('created_at', { ascending: false }).limit(20);
-      if (error) { console.error('Failed to load requests:', error); return; }
-      myRequests = data.map(r => ({
-        id: r.id, name: r.name, items: parseEquipmentString(r.equipment),
-        useLocation: r.location, dateNeeded: r.date_needed, returnDate: r.return_date,
-        notes: r.notes, status: r.status
-      }));
-      renderMyRequests();
-    }
+  const sessionId = getSessionId();
+
+  const { data, error } = await sb
+    .from('requests')
+    .select('*')
+    .eq('requester_id', sessionId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) { console.error('Failed to load requests:', error); return; }
+
+  myRequests = data.map(r => ({
+    id: r.id,
+    name: r.name,
+    items: parseEquipmentString(r.equipment),
+    useLocation: r.location,
+    dateNeeded: r.date_needed,
+    returnDate: r.return_date,
+    notes: r.notes,
+    status: r.status
+  }));
+
+  renderMyRequests();
+}
 
     function parseEquipmentString(str) {
       if (!str) return [];
