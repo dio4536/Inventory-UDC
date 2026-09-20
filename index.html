@@ -1462,16 +1462,6 @@ function getSessionId() {
 
       setButtonLoading('rqSubmitBtn', true);
       const { error } = await sb.from('requests').insert({
-        name,
-        equipment: requestCart.map(it => `${it.name} (x${it.qty})`).join('; '),
-        quantity: requestCart.reduce((sum, it) => sum + it.qty, 0),
-        location: useLocation,
-        date_needed: dateNeeded || null,
-        return_date: returnDate || null,
-        notes,
-        status: 'Pending'
-      });
-      const { error } = await sb.from('requests').insert({
   name: name,
   equipment: requestCart.map(it => `${it.name} (x${it.qty})`).join('; '),
   quantity: requestCart.reduce((sum, it) => sum + it.qty, 0),
