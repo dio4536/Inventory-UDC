@@ -363,39 +363,48 @@
           <div class="small">Locations</div>
         </div>
       </div>
-      <div class="toolbar">
-        <label>Status</label>
-        <select id="invStatusFilter" onchange="renderInventoryTable()">
-          <option value="">All</option>
-          <option value="Available">Available</option>
-          <option value="Checked Out">Checked Out</option>
-        </select>
-        <label>Location</label>
-        <select id="invLocationFilter" onchange="renderInventoryTable()">
+
+      <h3 style="margin-top:24px; display:flex; align-items:center; gap:8px;">
+        📦 Stock Summary — All Items
+      </h3>
+      <p style="font-size:13px; color:#5c667a; margin-bottom:8px;">
+        Every item in inventory, grouped by name.
+      </p>
+
+      <div class="toolbar" style="margin-bottom:8px;">
+        <input type="text" id="stockSearch" placeholder="🔍 Search by name or ID..." oninput="renderStockTable()" style="flex:1; min-width:200px;">
+
+        <label style="margin:0; font-size:12px;">Location</label>
+        <select id="stockLocationFilter" onchange="renderStockTable()">
           <option value="">All Locations</option>
         </select>
-        <label>Sort</label>
-        <select id="invSort" onchange="renderInventoryTable()">
-          <option value="id">ID (A–Z)</option>
-          <option value="id-desc">ID (Z–A)</option>
-          <option value="name">Name (A–Z)</option>
-          <option value="location">Location (A–Z)</option>
-          <option value="status">Status</option>
+
+        <label style="margin:0; font-size:12px;">Status</label>
+        <select id="stockStatusFilter" onchange="renderStockTable()">
+          <option value="">All</option>
+          <option value="available">Has available stock</option>
+          <option value="out">All checked out</option>
+          <option value="in-use">Currently in use</option>
         </select>
-        <input type="text" id="invSearch" placeholder="Search ID or name..." oninput="renderInventoryTable()">
-        <span class="result-count" id="invCount">0 items</span>
+
+        <span class="result-count" id="stockCount">0 items</span>
       </div>
+
       <table class="table">
         <thead>
           <tr>
             <th>Equipment ID</th>
-            <th>Equipment</th>
+            <th>Equipment Name</th>
+            <th>Total</th>
+            <th>Available</th>
+            <th>Checked Out</th>
             <th>Location</th>
-            <th>Qty</th>
-            <th>Status</th>
+            <th>Stock Bar</th>
           </tr>
         </thead>
-        <tbody id="inv"></tbody>
+        <tbody id="stockTable">
+          <tr><td colspan="7" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">Loading stock summary...</td></tr>
+        </tbody>
       </table>
     </section>
 
@@ -436,7 +445,7 @@
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ============================================================
-    // SESSION ID — used to isolate each browser's requests
+    // SESSION ID
     // ============================================================
     function getSessionId() {
       let sid = localStorage.getItem('udc_requester_id');
@@ -1450,60 +1459,130 @@
       document.getElementById('out').textContent = outItems;
       document.getElementById('locations').textContent = CHECKOUT_LOCATIONS.length;
 
-      const locFilter = document.getElementById('invLocationFilter');
-      if (locFilter && locFilter.options.length <= 1) {
+      // Populate stock location filter
+      const stockLocFilter = document.getElementById('stockLocationFilter');
+      if (stockLocFilter && stockLocFilter.options.length <= 1) {
         const uniqueLocs = [...new Set(EQUIPMENT.map(e => e.location))].sort();
         uniqueLocs.forEach(loc => {
           const opt = document.createElement('option');
           opt.value = loc;
           opt.textContent = loc;
-          locFilter.appendChild(opt);
+          stockLocFilter.appendChild(opt);
         });
       }
-      renderInventoryTable();
+      renderStockTable();
     }
 
-    function renderInventoryTable() {
-      const statusFilter = document.getElementById('invStatusFilter')?.value || '';
-      const locationFilter = document.getElementById('invLocationFilter')?.value || '';
-      const sortKey = document.getElementById('invSort')?.value || 'id';
-      const search = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
+    // ============================================================
+    // STOCK SUMMARY TABLE
+    // ============================================================
+    function renderStockTable() {
+      const tbody = document.getElementById('stockTable');
+      if (!tbody) return;
 
-      let items = [...EQUIPMENT];
-      if (statusFilter) items = items.filter(e => e.status === statusFilter);
-      if (locationFilter) items = items.filter(e => e.location === locationFilter);
-      if (search) items = items.filter(e =>
-        e.id.toLowerCase().includes(search) || e.name.toLowerCase().includes(search)
-      );
+      // ---- Group by name AND collect IDs ----
+      const groups = {};
+      EQUIPMENT.forEach(e => {
+        if (!groups[e.name]) {
+          groups[e.name] = {
+            name: e.name,
+            ids: [],
+            total: 0,
+            available: 0,
+            checkedOut: 0,
+            locations: new Set()
+          };
+        }
+        const q = e.quantity || 1;
+        groups[e.name].total += q;
+        groups[e.name].ids.push(e.id);
+        groups[e.name].locations.add(e.location);
 
-      items.sort((a, b) => {
-        switch (sortKey) {
-          case 'id': return a.id.localeCompare(b.id);
-          case 'id-desc': return b.id.localeCompare(a.id);
-          case 'name': return a.name.localeCompare(b.name);
-          case 'location': return a.location.localeCompare(b.location) || a.id.localeCompare(b.id);
-          case 'status': return a.status === b.status ? a.id.localeCompare(b.id) : (a.status === 'Available' ? -1 : 1);
-          default: return 0;
+        if (q > 1) {
+          const out = BULK_OUT[e.id] || 0;
+          groups[e.name].checkedOut += out;
+          groups[e.name].available += Math.max(0, q - out);
+        } else {
+          if (e.status === 'Available') {
+            groups[e.name].available += q;
+          } else if (e.status === 'Checked Out') {
+            groups[e.name].checkedOut += q;
+          } else {
+            groups[e.name].available += q;
+          }
         }
       });
 
-      const countEl = document.getElementById('invCount');
-      if (countEl) countEl.textContent = items.length + (items.length === 1 ? ' row' : ' rows');
+      let rows = Object.values(groups).map(g => ({
+        ...g,
+        locations: Array.from(g.locations).sort(),
+        idDisplay: g.ids.length === 1
+          ? g.ids[0]
+          : `${g.ids[0]} … (${g.ids.length})`
+      }));
 
-      const tbody = document.getElementById('inv');
+      // Filter by search
+      const search = (document.getElementById('stockSearch')?.value || '').toLowerCase().trim();
+      if (search) {
+        rows = rows.filter(r =>
+          r.name.toLowerCase().includes(search) ||
+          r.ids.some(id => id.toLowerCase().includes(search)) ||
+          r.locations.some(loc => loc.toLowerCase().includes(search))
+        );
+      }
+
+      // Filter by location
+      const locFilter = document.getElementById('stockLocationFilter')?.value || '';
+      if (locFilter) {
+        rows = rows.filter(r => r.locations.includes(locFilter));
+      }
+
+      // Filter by status
+      const statusFilter = document.getElementById('stockStatusFilter')?.value || '';
+      if (statusFilter === 'in-use') {
+        rows = rows.filter(r => r.checkedOut > 0);
+      } else if (statusFilter === 'available') {
+        rows = rows.filter(r => r.available > 0);
+      } else if (statusFilter === 'out') {
+        rows = rows.filter(r => r.available === 0 && r.checkedOut > 0);
+      }
+
+      // Sort A–Z
+      rows.sort((a, b) => a.name.localeCompare(b.name));
+
+      const countEl = document.getElementById('stockCount');
+      if (countEl) countEl.textContent = rows.length + (rows.length === 1 ? ' item' : ' items');
+
       tbody.innerHTML = '';
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match.</td></tr>`;
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">No items match your filter.</td></tr>`;
         return;
       }
-      items.forEach(e => {
+
+      rows.forEach(r => {
+        const pctAvail = r.total > 0 ? (r.available / r.total) * 100 : 0;
+        const pctOut = r.total > 0 ? (r.checkedOut / r.total) * 100 : 0;
+
+        let barColor = '#22c55e';
+        if (r.available === 0 && r.checkedOut > 0) barColor = '#dc2626';
+        else if (pctAvail < 25) barColor = '#f59e0b';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${e.id}</strong></td>
-          <td>${e.name}</td>
-          <td>${e.location}</td>
-          <td>${e.quantity || 1}</td>
-          <td><span class="status-badge ${e.status === 'Checked Out' ? 'out' : ''}">${e.status}</span></td>
+          <td><strong style="font-size:11px; color:#687386;">${r.idDisplay}</strong></td>
+          <td><strong>${r.name}</strong></td>
+          <td>${r.total}</td>
+          <td><span style="color:#15803d; font-weight:700;">${r.available}</span></td>
+          <td><span style="color:${r.checkedOut > 0 ? '#b85c00' : '#687386'}; font-weight:700;">${r.checkedOut}</span></td>
+          <td style="font-size:12px; color:#5c667a;">${r.locations.join(', ')}</td>
+          <td style="min-width:140px;">
+            <div style="position:relative; height:8px; background:#e5e8ee; border-radius:6px; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; height:100%; width:${pctAvail}%; background:${barColor}; border-radius:6px;"></div>
+            </div>
+            <div style="font-size:10px; color:#687386; margin-top:2px;">
+              ${Math.round(pctAvail)}% available${r.checkedOut > 0 ? ` · ${Math.round(pctOut)}% out` : ''}
+            </div>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -1668,11 +1747,8 @@
           .update({ status: 'Checked Out' })
           .in('equipment_id', trackedIds)
           .select();
-        if (updateError) {
-          console.error('❌ Failed to update inventory status:', updateError);
-        } else {
-          console.log('✅ Inventory status updated:', updateData);
-        }
+        if (updateError) console.error('❌ Failed to update inventory status:', updateError);
+        else console.log('✅ Inventory status updated:', updateData);
       }
 
       setButtonLoading('coSubmitBtn', false);
@@ -1752,11 +1828,8 @@
           .update({ status: 'Available' })
           .in('equipment_id', trackedIds)
           .select();
-        if (updateError) {
-          console.error('❌ Failed to update inventory status:', updateError);
-        } else {
-          console.log('✅ Inventory status updated:', updateData);
-        }
+        if (updateError) console.error('❌ Failed to update inventory status:', updateError);
+        else console.log('✅ Inventory status updated:', updateData);
       }
 
       setButtonLoading('ciSubmitBtn', false);
