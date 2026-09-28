@@ -159,6 +159,9 @@
         <button id="roleBtnAdmin" class="active" onclick="setRole('admin')">Admin</button>
         <button id="roleBtnUser" onclick="setRole('user')">User</button>
       </div>
+      <button class="bell-btn admin-only" id="fixedBtn" onclick="showFixedInventory()" title="Fixed Furniture" style="font-size:14px; padding:8px 14px;">
+        🏛️ Fixed
+      </button>
       <button class="bell-btn" id="bellBtn" onclick="goToPending()" title="Pending Pre-Requests">
         🔔
         <span class="bell-badge" id="bellBadge">0</span>
@@ -176,6 +179,9 @@
         <button class="primary" type="button" onclick="show('checkout')">Check Out</button>
         <button type="button" onclick="show('checkin')">Check In</button>
         <button type="button" onclick="show('request')">Pre-Request</button>
+        <button type="button" class="admin-only" onclick="showFixedInventory()" style="background:#f3e8ff; color:#7c3aed;">
+          🏛️ Fixed Furniture
+        </button>
       </div>
     </section>
 
@@ -365,10 +371,10 @@
       </div>
 
       <h3 style="margin-top:24px; display:flex; align-items:center; gap:8px;">
-        📦 Stock Summary — All Items
+        📦 Stock Summary — Movable Equipment
       </h3>
       <p style="font-size:13px; color:#5c667a; margin-bottom:8px;">
-        Every item in inventory, grouped by name.
+        Movable items grouped by name. For fixed furniture, use the 🏛️ Fixed button.
       </p>
 
       <div class="toolbar" style="margin-bottom:8px;">
@@ -406,6 +412,33 @@
           <tr><td colspan="7" style="text-align:center; color:#8b95a5; font-style:italic; padding:20px;">Loading stock summary...</td></tr>
         </tbody>
       </table>
+    </section>
+
+    <section class="panel admin-only" id="fixedInventory">
+      <h2>🏛️ Fixed Furniture — By Location</h2>
+      <p style="font-size:13px; color:#5c667a; margin-bottom:12px;">
+        Permanent installations. These items are not checked out — they live at a specific location.
+      </p>
+
+      <div class="toolbar" style="margin-bottom:12px;">
+        <input type="text" id="fixedSearch" placeholder="🔍 Search by item or location..." oninput="renderFixedInventory()" style="flex:1; min-width:200px;">
+
+        <label style="margin:0; font-size:12px;">Location</label>
+        <select id="fixedLocationFilter" onchange="renderFixedInventory()">
+          <option value="">All Locations</option>
+        </select>
+
+        <label style="margin:0; font-size:12px;">Category</label>
+        <select id="fixedCategoryFilter" onchange="renderFixedInventory()">
+          <option value="">All Categories</option>
+        </select>
+
+        <span class="result-count" id="fixedCount">0 items</span>
+      </div>
+
+      <div id="fixedInventoryList">
+        <div class="req-cart-empty">Loading fixed inventory...</div>
+      </div>
     </section>
 
     <section class="panel admin-only" id="pendingRequests">
@@ -504,6 +537,8 @@
     let currentUser = null;
     let realtimeChannel = null;
     let BULK_OUT = {};
+    let FIXED_INVENTORY = [];
+    let fixedFiltersPopulated = false;
 
     // ============================================================
     // AUTHENTICATION
@@ -760,6 +795,29 @@
       return Math.max(0, total - out);
     }
 
+    async function loadFixedInventory() {
+      const { data, error } = await sb
+        .from('fixed_inventory')
+        .select('*')
+        .order('location', { ascending: true })
+        .order('item_name', { ascending: true });
+
+      if (error) {
+        console.error('Failed to load fixed inventory:', error);
+        FIXED_INVENTORY = [];
+        return;
+      }
+      FIXED_INVENTORY = data.map(item => ({
+        id: item.id,
+        location: item.location,
+        itemName: item.item_name,
+        quantity: item.quantity || 1,
+        category: item.category || '',
+        notes: item.notes || ''
+      }));
+      console.log('🏛️ Fixed inventory loaded:', FIXED_INVENTORY.length, 'rows');
+    }
+
     async function loadPendingRequests() {
       if (!currentUser) return;
       const { data, error } = await sb
@@ -829,6 +887,12 @@
           await loadBulkCheckouts();
           renderDashboard();
           renderRequestPicker();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fixed_inventory' }, async () => {
+          await loadFixedInventory();
+          fixedFiltersPopulated = false;
+          populateFixedFilters();
+          renderFixedInventory();
         })
         .subscribe();
     }
@@ -1459,7 +1523,6 @@
       document.getElementById('out').textContent = outItems;
       document.getElementById('locations').textContent = CHECKOUT_LOCATIONS.length;
 
-      // Populate stock location filter
       const stockLocFilter = document.getElementById('stockLocationFilter');
       if (stockLocFilter && stockLocFilter.options.length <= 1) {
         const uniqueLocs = [...new Set(EQUIPMENT.map(e => e.location))].sort();
@@ -1480,7 +1543,6 @@
       const tbody = document.getElementById('stockTable');
       if (!tbody) return;
 
-      // ---- Group by name AND collect IDs ----
       const groups = {};
       EQUIPMENT.forEach(e => {
         if (!groups[e.name]) {
@@ -1521,7 +1583,6 @@
           : `${g.ids[0]} … (${g.ids.length})`
       }));
 
-      // Filter by search
       const search = (document.getElementById('stockSearch')?.value || '').toLowerCase().trim();
       if (search) {
         rows = rows.filter(r =>
@@ -1531,13 +1592,11 @@
         );
       }
 
-      // Filter by location
       const locFilter = document.getElementById('stockLocationFilter')?.value || '';
       if (locFilter) {
         rows = rows.filter(r => r.locations.includes(locFilter));
       }
 
-      // Filter by status
       const statusFilter = document.getElementById('stockStatusFilter')?.value || '';
       if (statusFilter === 'in-use') {
         rows = rows.filter(r => r.checkedOut > 0);
@@ -1547,7 +1606,6 @@
         rows = rows.filter(r => r.available === 0 && r.checkedOut > 0);
       }
 
-      // Sort A–Z
       rows.sort((a, b) => a.name.localeCompare(b.name));
 
       const countEl = document.getElementById('stockCount');
@@ -1585,6 +1643,133 @@
           </td>
         `;
         tbody.appendChild(tr);
+      });
+    }
+
+    // ============================================================
+    // FIXED INVENTORY
+    // ============================================================
+    async function showFixedInventory() {
+      setRole('admin');
+      show('fixedInventory');
+      await loadFixedInventory();
+      populateFixedFilters();
+      renderFixedInventory();
+    }
+
+    function populateFixedFilters() {
+      if (fixedFiltersPopulated) return;
+
+      const locSel = document.getElementById('fixedLocationFilter');
+      if (locSel) {
+        const locations = [...new Set(FIXED_INVENTORY.map(f => f.location))].sort();
+        locSel.innerHTML = '<option value="">All Locations</option>';
+        locations.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc;
+          opt.textContent = loc;
+          locSel.appendChild(opt);
+        });
+      }
+
+      const catSel = document.getElementById('fixedCategoryFilter');
+      if (catSel) {
+        const cats = [...new Set(FIXED_INVENTORY.map(f => f.category).filter(Boolean))].sort();
+        catSel.innerHTML = '<option value="">All Categories</option>';
+        cats.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          catSel.appendChild(opt);
+        });
+      }
+
+      fixedFiltersPopulated = true;
+    }
+
+    function renderFixedInventory() {
+      const container = document.getElementById('fixedInventoryList');
+      if (!container) return;
+
+      const search = (document.getElementById('fixedSearch')?.value || '').toLowerCase().trim();
+      const locFilter = document.getElementById('fixedLocationFilter')?.value || '';
+      const catFilter = document.getElementById('fixedCategoryFilter')?.value || '';
+
+      let rows = [...FIXED_INVENTORY];
+      if (locFilter) rows = rows.filter(r => r.location === locFilter);
+      if (catFilter) rows = rows.filter(r => r.category === catFilter);
+      if (search) {
+        rows = rows.filter(r =>
+          r.itemName.toLowerCase().includes(search) ||
+          r.location.toLowerCase().includes(search) ||
+          (r.category || '').toLowerCase().includes(search)
+        );
+      }
+
+      const grouped = {};
+      rows.forEach(r => {
+        if (!grouped[r.location]) grouped[r.location] = [];
+        grouped[r.location].push(r);
+      });
+
+      const locations = Object.keys(grouped).sort();
+
+      const countEl = document.getElementById('fixedCount');
+      if (countEl) {
+        countEl.textContent = rows.length + (rows.length === 1 ? ' row' : ' rows') +
+          ' · ' + locations.length + (locations.length === 1 ? ' location' : ' locations');
+      }
+
+      container.innerHTML = '';
+      if (locations.length === 0) {
+        container.innerHTML = '<div class="req-cart-empty">No fixed items match your filter.</div>';
+        return;
+      }
+
+      locations.forEach(loc => {
+        const items = grouped[loc];
+        const totalQty = items.reduce((sum, r) => sum + r.quantity, 0);
+
+        const card = document.createElement('div');
+        card.style.cssText = 'border:1px solid #e2e8f2;border-radius:12px;padding:0;margin-bottom:16px;background:#fff;overflow:hidden;';
+
+        const header = document.createElement('div');
+        header.style.cssText = 'background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;';
+        header.innerHTML = `
+          <div><strong style="font-size:15px;">📍 ${loc}</strong></div>
+          <span style="background:rgba(255,255,255,0.25);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
+            ${items.length} ${items.length === 1 ? 'item' : 'items'} · ${totalQty} total
+          </span>
+        `;
+        card.appendChild(header);
+
+        const table = document.createElement('table');
+        table.className = 'table';
+        table.style.marginTop = '0';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+        items.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${item.itemName}</strong></td>
+            <td style="font-size:12px;color:#687386;">${item.category || '—'}</td>
+            <td><span style="color:#7c3aed;font-weight:700;">${item.quantity}</span></td>
+            <td style="font-size:12px;color:#5c667a;">${item.notes || '—'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        card.appendChild(table);
+        container.appendChild(card);
       });
     }
 
@@ -1953,6 +2138,7 @@
 
       await loadInventory();
       await loadBulkCheckouts();
+      await loadFixedInventory();
       renderRequestPicker();
       renderRequestCart();
       renderDashboard();
